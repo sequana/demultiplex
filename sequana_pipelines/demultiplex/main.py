@@ -1,7 +1,6 @@
 import sys
 import os
 import argparse
-import shutil
 
 from sequana.pipelines_common import SlurmOptions, Colors, SnakemakeOptions
 from sequana.pipelines_common import PipelineManager
