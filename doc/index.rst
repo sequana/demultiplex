@@ -32,7 +32,7 @@ For more information, please see `github <https://sequana.readthedocs.io>`_.
 The Sequana demultiplex pipeline
 ==============================================
 
-.. include:: ../sequana_pipelines/demultiplex/README.rst
+.. include:: ../README.rst
 
 
 

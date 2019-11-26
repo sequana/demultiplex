@@ -1,3 +1,2 @@
-fastqc
-pigz
+bcl2fastq
 sequana
