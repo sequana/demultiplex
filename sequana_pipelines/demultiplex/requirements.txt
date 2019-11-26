@@ -1,0 +1,3 @@
+fastqc
+pigz
+sequana
