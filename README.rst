@@ -17,8 +17,6 @@ This pipeline is to be used with bcl2fastq 2.20.0 and sequana>=0.8.0
 
 .. image:: https://github.com/sequana/sequana_demultiplex/blob/master/sequana_pipelines/demultiplex/dag.png?raw=true
 
-https://raw.githubusercontent.com/sequana/sequana_demultiplex/master/sequana_demultiplex/sequana_pipelines/demultiplex/dag.png
-
 Details
 ~~~~~~~
 
