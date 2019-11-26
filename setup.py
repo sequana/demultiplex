@@ -3,8 +3,8 @@
 __revision__ = "$Id: $" # for the SVN Id
 from setuptools import setup, find_namespace_packages
 
-_MAJOR               = 0
-_MINOR               = 8
+_MAJOR               = 1
+_MINOR               = 0
 _MICRO               = 0
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
@@ -54,7 +54,7 @@ setup(
     packages = ["sequana_pipelines.demultiplex",
         'sequana_pipelines.demultiplex.data' ],
 
-    install_requires = "sequana",
+    install_requires = "sequana>=0.8.0",
 
     # This is recursive include of data files
     exclude_package_data = {"": ["__pycache__"]},
