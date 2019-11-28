@@ -2,8 +2,7 @@ import sys
 import os
 import argparse
 
-from sequana.pipelines_common import SlurmOptions, Colors, SnakemakeOptions
-from sequana.pipelines_common import PipelineManager
+from sequana.pipelines_common import *
 
 col = Colors()
 
@@ -88,7 +87,7 @@ def main(args=None):
     cfg.input_directory = os.path.abspath(options.bcl_directory)
     cfg.bcl2fastq.threads = options.threads
     cfg.bcl2fastq.barcode_mismatch = options.mismatch
-    cfg.bcl2fastq.sample_sheet_file = options.samplesheet
+    cfg.bcl2fastq.sample_sheet_file = os.path.abspath(options.samplesheet)
     cfg.bcl2fastq.output_directory = options.output_directory
     cfg.bcl2fastq.ignore_missing_controls= options.ignore_missing_controls
     cfg.bcl2fastq.ignore_missing_bcls = options.ignore_missing_bcls
