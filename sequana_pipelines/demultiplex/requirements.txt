@@ -1,2 +1,1 @@
-bcl2fastq
-sequana
+- bcl2fastq

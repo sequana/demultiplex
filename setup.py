@@ -3,8 +3,8 @@
 __revision__ = "$Id: $" # for the SVN Id
 from setuptools import setup, find_namespace_packages
 
-_MAJOR               = 1
-_MINOR               = 0
+_MAJOR               = 0
+_MINOR               = 8
 _MICRO               = 0
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
@@ -13,14 +13,14 @@ metainfo = {
     'authors': {"main": ("cokelaer", "thomas.cokelaer@pasteur.fr")},
     'version': version,
     'license' : 'new BSD',
-    'download_url' : ['http://pypi.python.org/pypi/sequana_demultiplex'],
-    'url' : ["http://github.com/sequana/"],
+    'url' : "https://github.com/sequana/",
     'description': "Pipeline that runs bcl2fastq and creates additional plots within a Snakemake workflow" ,
     'platforms' : ['Linux', 'Unix', 'MacOsX', 'Windows'],
-    'keywords' : ['bcl2fastq, Illumina, bcl, fastq, demultiplexing, base caller'],
+    'keywords' : ['bcl2fastq, Illumina, bcl, fastq, demultiplexing, base caller', 'snakemake', 'sequana'],
     'classifiers' : [
-          'Development Status :: 4 - Beta',
-          'Intended Audience :: Developers',
+          'Development Status :: 5 - Production/Stable',
+          'Intended Audience :: Education',
+          'Intended Audience :: End Users/Desktop',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: BSD License',
           'Operating System :: OS Independent',
@@ -47,7 +47,6 @@ setup(
     license          = metainfo['license'],
     platforms        = metainfo['platforms'],
     url              = metainfo['url'],
-    download_url     = metainfo['download_url'],
     classifiers      = metainfo['classifiers'],
 
     # package installation
@@ -59,7 +58,7 @@ setup(
     # This is recursive include of data files
     exclude_package_data = {"": ["__pycache__"]},
     package_data = {
-        '': ['config.yaml', "*.rules"],
+        '': ['config.yaml', "demultiplex.rules", "*json", "requirements.txt", "*png"],
         'sequana_pipelines.demultiplex.data' : ['*.*'], 
         },
 
