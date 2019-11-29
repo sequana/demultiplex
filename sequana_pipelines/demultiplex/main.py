@@ -3,12 +3,18 @@ import os
 import argparse
 
 from sequana.pipelines_common import *
+from sequana.snaketools import Module
+from sequana import logger
+logger.level = "INFO"
 
 col = Colors()
 
+NAME = "demultiplex"
+m = Module(NAME)
+m.is_executable()
 
 class Options(argparse.ArgumentParser):
-    def __init__(self, prog="demultiplex"):
+    def __init__(self, prog=NAME):
         usage = col.purple(
             """This script prepares the sequana pipeline demultiplex layout to
             include the Snakemake pipeline and its configuration file ready to
@@ -19,11 +25,11 @@ class Options(argparse.ArgumentParser):
 
             For a local run, use :
 
-                sequana_pipelines_demultiplex --fastq-directory PATH_TO_DATA --run-mode local
+                sequana_pipelines_demultiplex --input-directory PATH_TO_DATA --run-mode local
 
             For a run on a SLURM cluster:
 
-                sequana_pipelines_demultiplex --fastq-directory PATH_TO_DATA --run-mode slurm
+                sequana_pipelines_demultiplex --input-directory PATH_TO_DATA --run-mode slurm
 
         """
         )
@@ -34,7 +40,7 @@ class Options(argparse.ArgumentParser):
         so.add_options(self)
 
         # add a snakemake group of options to the parser
-        so = SnakemakeOptions()
+        so = SnakemakeOptions(working_directory="fastq")
         so.add_options(self)
 
         self.add_argument(
@@ -57,7 +63,8 @@ class Options(argparse.ArgumentParser):
             dest="output_directory", default="fastq",
             help="Where to save the FASTQ results (default fastq )",
         )
-        pipeline_group.add_argument("--samplesheet", dest="samplesheet")
+        pipeline_group.add_argument("--samplesheet", dest="samplesheet", 
+            default="SampleSheet.csv")
         pipeline_group.add_argument("--ignore-missing-controls", 
             dest="ignore_missing_controls", action="store_true", default=True)
         pipeline_group.add_argument("--ignore-missing-bcls",
@@ -71,7 +78,7 @@ class Options(argparse.ArgumentParser):
 
 
 def main(args=None):
-    NAME = "demultiplex"
+
     if args is None:
         args = sys.argv
 
@@ -83,6 +90,10 @@ def main(args=None):
     manager.setup()
 
     # fill the config file with input parameters
+    if os.path.exists(options.samplesheet) is False:
+        raise IOError("Please provide an existing sample sheet file with --samplesheet")
+
+
     cfg = manager.config.config
     cfg.input_directory = os.path.abspath(options.bcl_directory)
     cfg.bcl2fastq.threads = options.threads
@@ -98,7 +109,6 @@ def main(args=None):
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.
     manager.teardown()
-
 
 if __name__ == "__main__":
     main()
