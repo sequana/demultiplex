@@ -99,6 +99,11 @@ def main(args=None):
     cfg.bcl2fastq.threads = options.threads
     cfg.bcl2fastq.barcode_mismatch = options.mismatch
     cfg.bcl2fastq.sample_sheet_file = os.path.abspath(options.samplesheet)
+
+    if os.path.exists(options.samplesheet) is False:
+        logger.error("Input Samplesheet {} not found. ".format(options.samplesheet))
+        sys.exit(1)
+
     cfg.bcl2fastq.output_directory = options.output_directory
     cfg.bcl2fastq.ignore_missing_controls= options.ignore_missing_controls
     cfg.bcl2fastq.ignore_missing_bcls = options.ignore_missing_bcls
