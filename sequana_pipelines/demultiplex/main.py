@@ -78,6 +78,9 @@ def main(args=None):
     if args is None:
         args = sys.argv
 
+    if "--version" in sys.argv:
+        print_version(NAME)
+
     options = Options(NAME).parse_args(args[1:])
 
     manager = PipelineManager(options, NAME)
