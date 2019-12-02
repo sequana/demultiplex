@@ -80,6 +80,7 @@ def main(args=None):
 
     if "--version" in sys.argv:
         print_version(NAME)
+        sys.exit(0)
 
     options = Options(NAME).parse_args(args[1:])
 
