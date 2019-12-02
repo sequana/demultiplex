@@ -15,7 +15,7 @@ http://emea.support.illumina.com/downloads/bcl2fastq-conversion-software-v2-20.h
 import os
 import json
 
-# This must be defined before the include 
+# This must be defined before the include
 configfile: "config.yaml"
 
 # an alias
@@ -32,7 +32,7 @@ rule all:
         cfg['output_directory'] + "/Stats/summary.txt",
         cfg['output_directory'] + "/undetermined_barcodes.csv",
         cfg['output_directory'] + "/barcodes.png",
-        
+
 
 rule plot_unknown_barcodes:
     input: cfg['output_directory'] + "/Stats/Stats.json"
