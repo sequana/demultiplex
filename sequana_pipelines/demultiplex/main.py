@@ -13,6 +13,7 @@ NAME = "demultiplex"
 m = Module(NAME)
 m.is_executable()
 
+
 class Options(argparse.ArgumentParser):
     def __init__(self, prog=NAME):
         usage = col.purple(
@@ -43,15 +44,10 @@ class Options(argparse.ArgumentParser):
         so = SnakemakeOptions(working_directory="fastq")
         so.add_options(self)
 
-        self.add_argument(
-            "--run-mode",
-            dest="run_mode",
-            required=True,
-            choices=['local', 'slurm'],
-            help="""run_mode can be either 'local' or 'slurm'. Use local to run
-                the pipeline locally, otherwise use 'slurm' to run on a cluster
-                with SLURM scheduler"""
-        )
+
+        so = GeneralOptions()
+        so.add_options(self)
+
 
         pipeline_group = self.add_argument_group("pipeline")
 
@@ -114,6 +110,7 @@ def main(args=None):
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.
     manager.teardown()
+
 
 if __name__ == "__main__":
     main()
