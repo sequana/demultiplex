@@ -24,8 +24,7 @@ Usage
 ::
 
     sequana_pipelines_demultiplex --help
-    sequana_pipelines_demultiplex --input-directory DATAPATH --run-mode local
-    sequana_pipelines_demutliplex --input-directory DATAPATH --run-mode slurm
+    sequana_pipelines_demultiplex --working-directory DATAPATH --bcl-directory bcldata
 
 This creates a directory **fastq**. You just need to execute the pipeline::
 
@@ -46,14 +45,15 @@ This pipelines requires the following executable(s):
 - bcl2fastq 2.20.0
 
 
-.. image:: https://raw.githubusercontent.com/sequana/sequana_demutliplex/master/sequana_pipelines/demultiplex/dag.png
+.. image:: https://raw.githubusercontent.com/sequana/sequana_demulitiplex/master/sequana_pipelines/demultiplex/dag.png
 
 
 Details
 ~~~~~~~~~
 
-This pipeline runs fastqc in parallel on the input fastq files (paired or not)
-and then execute multiqc. A brief sequana summary report is also produced.
+This pipeline runs bcl2fastq 2.20 and creates a set of diagnostics plots to help
+deciphering common issues such as missing index and sample sheet errors. 
+
 
 
 Rules and configuration details

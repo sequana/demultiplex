@@ -26,18 +26,17 @@ class Options(argparse.ArgumentParser):
 
             For a local run, use :
 
-                sequana_pipelines_demultiplex --input-directory PATH_TO_DATA --run-mode local
+                sequana_pipelines_demultiplex --bcl-directory PATH_TO_DATA --samplesheet SampleSheet.csv
 
-            For a run on a SLURM cluster:
-
-                sequana_pipelines_demultiplex --input-directory PATH_TO_DATA --run-mode slurm
 
         """
         )
         super(Options, self).__init__(usage=usage, prog=prog, description="")
 
         # add a new group of options to the parser
-        so = SlurmOptions()
+        # demultiplex requires lots of memory sometimes hence the 64G options
+        # 
+        so = SlurmOptions(queue="biomics", memory="64000", cores=16)
         so.add_options(self)
 
         # add a snakemake group of options to the parser
@@ -51,14 +50,11 @@ class Options(argparse.ArgumentParser):
 
         pipeline_group = self.add_argument_group("pipeline")
 
-        pipeline_group.add_argument("--threads", dest="threads", default=4, type=int)
+        pipeline_group.add_argument("--threads", dest="threads", default=4,
+            type=int, help="Number of threads to use during the demultiplexing")
         pipeline_group.add_argument("--barcode-mismatch", dest="mismatch", default=0, type=int)
         pipeline_group.add_argument("--merge", dest="merge", action="store_true")
         pipeline_group.add_argument("--bcl-directory", dest="bcl_directory")
-        pipeline_group.add_argument("--output-directory",
-            dest="output_directory", default="fastq",
-            help="Where to save the FASTQ results (default fastq )",
-        )
         pipeline_group.add_argument("--samplesheet", dest="samplesheet", 
             default="SampleSheet.csv")
         pipeline_group.add_argument("--ignore-missing-controls", 
@@ -93,7 +89,6 @@ def main(args=None):
     if os.path.exists(options.samplesheet) is False:
         raise IOError("Please provide an existing sample sheet file with --samplesheet")
 
-
     cfg = manager.config.config
     cfg.input_directory = os.path.abspath(options.bcl_directory)
     cfg.bcl2fastq.threads = options.threads
@@ -104,7 +99,8 @@ def main(args=None):
         logger.error("Input Samplesheet {} not found. ".format(options.samplesheet))
         sys.exit(1)
 
-    cfg.bcl2fastq.output_directory = options.output_directory
+    # this is defined by the working_directory
+    cfg.bcl2fastq.output_directory = "."
     cfg.bcl2fastq.ignore_missing_controls= options.ignore_missing_controls
     cfg.bcl2fastq.ignore_missing_bcls = options.ignore_missing_bcls
     cfg.bcl2fastq.no_bgzf_compression = options.no_bgzf_compression

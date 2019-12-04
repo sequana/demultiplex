@@ -40,4 +40,7 @@ The Sequana demultiplex pipeline
 .. include:: ../README.rst
 
 
+Changelog
+=========
 
+0.8.6: Uses 64G/biomics queue and 16 cores on a SLURM scheduler
