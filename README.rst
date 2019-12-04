@@ -45,7 +45,7 @@ This pipelines requires the following executable(s):
 - bcl2fastq 2.20.0
 
 
-.. image:: https://raw.githubusercontent.com/sequana/sequana_demulitiplex/master/sequana_pipelines/demultiplex/dag.png
+.. image:: https://raw.githubusercontent.com/sequana/sequana_demultiplex/master/sequana_pipelines/demultiplex/dag.png
 
 
 Details
