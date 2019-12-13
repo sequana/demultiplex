@@ -31,7 +31,9 @@ class Options(argparse.ArgumentParser):
 
         """
         )
-        super(Options, self).__init__(usage=usage, prog=prog, description="")
+        super(Options, self).__init__(usage=usage, prog=prog, description="",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
 
         # add a new group of options to the parser
         # demultiplex requires lots of memory sometimes hence the 64G options
@@ -53,7 +55,10 @@ class Options(argparse.ArgumentParser):
         pipeline_group.add_argument("--threads", dest="threads", default=4,
             type=int, help="Number of threads to use during the demultiplexing")
         pipeline_group.add_argument("--barcode-mismatch", dest="mismatch", default=0, type=int)
-        pipeline_group.add_argument("--merge", dest="merge", action="store_true")
+        pipeline_group.add_argument("--merging-strategy", required=True,
+            dest="merging_strategy", choices=["merge", "none"], 
+            help="""Merge Lanes of not. Set to 'merge' to merge all lanes. Set
+            to 'none' to NOT merge the lanes""")
         pipeline_group.add_argument("--bcl-directory", dest="bcl_directory")
         pipeline_group.add_argument("--samplesheet", dest="samplesheet", 
             default="SampleSheet.csv")
@@ -63,8 +68,6 @@ class Options(argparse.ArgumentParser):
             dest="ignore_missing_bcls", action="store_true", default=True)
         pipeline_group.add_argument("--no-bgzf-compression",
             dest="no_bgzf_compression", action="store_true", default=True)
-        pipeline_group.add_argument("--merge_all_lanes",
-            dest="merge_all_lanes", action="store_true", default=True)
         pipeline_group.add_argument("--write-fastq-reverse-complement",
             dest="write_fastq_reverse_complement", action="store_true", default=True)
 
@@ -104,7 +107,10 @@ def main(args=None):
     cfg.bcl2fastq.ignore_missing_controls= options.ignore_missing_controls
     cfg.bcl2fastq.ignore_missing_bcls = options.ignore_missing_bcls
     cfg.bcl2fastq.no_bgzf_compression = options.no_bgzf_compression
-    cfg.bcl2fastq.merge_all_lanes = options.merge_all_lanes
+    if options.merging_strategy == "merge":
+        cfg.bcl2fastq.merge_all_lanes = True
+    elif options.merging_strategy == "none":
+        cfg.bcl2fastq.merge_all_lanes = False
     cfg.bcl2fastq.write_fastq_reverse_complement = options.write_fastq_reverse_complement
 
     # finalise the command and save it; copy the snakemake. update the config

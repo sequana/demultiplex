@@ -20,7 +20,7 @@ def test_standalone_subprocess(tmp_path):
 
     with tempfile.TemporaryDirectory() as directory:
         cmd = """sequana_pipelines_demultiplex --bcl-directory {} """
-        cmd += """--run-mode local --working-directory {} --force --samplesheet {}"""
+        cmd += """--run-mode local --working-directory {} --force --samplesheet {} --merging-strategy none"""
         cmd = cmd.format(sharedir, directory, samplesheet)
         subprocess.call(cmd.split())
 
@@ -29,6 +29,18 @@ def test_standalone_script(tmp_path):
     directory = tmp_path / "test"
     directory.mkdir()
     import sequana_pipelines.demultiplex.main as m
-    sys.argv = ["test", "--bcl-directory", sharedir, "--run-mode", "local",
+    sys.argv = ["test", "--bcl-directory", sharedir, "--merging-strategy", "merge",
           "--working-directory", str(directory), "--force", "--samplesheet", samplesheet]
     m.main()
+
+
+def test_standalone_baddies(tmp_path):
+    directory = tmp_path / "test"
+    directory.mkdir()
+
+    with tempfile.TemporaryDirectory() as directory:
+        cmd = """sequana_pipelines_demultiplex --bcl-directory {} """
+        cmd += """--run-mode local --working-directory {} --force --samplesheet {} --merging-strategy none"""
+        cmd = cmd.format(sharedir, directory, "wrong")
+        subprocess.call(cmd.split())
+

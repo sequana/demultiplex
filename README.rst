@@ -62,3 +62,11 @@ Rules and configuration details
 Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/sequana_demutliplex/master/sequana_pipelines/demutliplex/config.yaml>`_
 to be used with the pipeline. Each rule used in the pipeline may have a section in the configuration file. 
 
+Changelog
+~~~~~~~~~
+
+* 0.9.1 Make the merging options compulsory. Users must tell whether they want to
+  merge the lanes or not. This avoid to do the merging or not whereas the
+  inverse was expected.
+* 0.8.6 Uses 64G/biomics queue and 16 cores on a SLURM scheduler
+
