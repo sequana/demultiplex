@@ -20,7 +20,7 @@ configfile: "config.yaml"
 
 # an alias
 cfg = config['bcl2fastq']
-
+outdir = os.path.abspath(cfg["output_directory"])
 
 if cfg["sample_sheet_file"].strip() != "":
     if os.path.exists(cfg['sample_sheet_file']) is False:
@@ -29,16 +29,17 @@ if cfg["sample_sheet_file"].strip() != "":
 
 rule all:
     input:
-        cfg['output_directory'] + "/Stats/summary.txt",
-        cfg['output_directory'] + "/undetermined_barcodes.csv",
-        cfg['output_directory'] + "/barcodes.png",
+        outdir + "/Stats/summary.txt",
+        outdir + "/undetermined_barcodes.csv",
+        outdir + "/barcodes.png",
+        outdir + "/summary.png",
 
 
 rule plot_unknown_barcodes:
-    input: cfg['output_directory'] + "/Stats/Stats.json"
+    input: outdir + "/Stats/Stats.json"
     output:
-        csv=cfg['output_directory'] + "/undetermined_barcodes.csv",
-        png=cfg['output_directory'] + "/barcodes.png"
+        csv=outdir + "/undetermined_barcodes.csv",
+        png=outdir + "/barcodes.png"
     run:
         from sequana.demultiplex import StatsFile
         s = StatsFile(input[0])
@@ -51,10 +52,10 @@ rule plot_unknown_barcodes:
 rule bcl2fastq:
     input:
     output:
-        cfg['output_directory'] + "/Stats/Stats.json",
+        outdir + "/Stats/Stats.json",
     params:
-        indir= config['input_directory'],
-        outdir= cfg['output_directory'],
+        indir= outdir,
+        outdir= outdir,
         sample_sheet=cfg['sample_sheet_file'],
         barcode_mismatch=cfg['barcode_mismatch']
     threads: cfg['threads']
@@ -86,11 +87,11 @@ rule bcl2fastq:
         shell(cmd)
 
 
-rule status:
-    input: cfg['output_directory'] + "/Stats/Stats.json"
+rule plot_summary:
+    input: outdir + "/Stats/Stats.json"
     output:
-        summary=cfg['output_directory'] + "/Stats/summary.txt",
-        barplot=cfg['output_directory'] + "/summary.png"
+        summary=outdir + "/Stats/summary.txt",
+        barplot=outdir + "/summary.png"
     run:
         from sequana.demultiplex import StatsFile
         s = StatsFile(input[0])
