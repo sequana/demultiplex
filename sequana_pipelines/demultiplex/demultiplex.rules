@@ -54,7 +54,7 @@ rule bcl2fastq:
     output:
         outdir + "/Stats/Stats.json",
     params:
-        indir= outdir,
+        indir= config["input_directory"],
         outdir= outdir,
         sample_sheet=cfg['sample_sheet_file'],
         barcode_mismatch=cfg['barcode_mismatch']

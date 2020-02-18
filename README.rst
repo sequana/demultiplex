@@ -65,6 +65,7 @@ to be used with the pipeline. Each rule used in the pipeline may have a section 
 Changelog
 ~~~~~~~~~
 
+* 0.9.3 Fix regression bug
 * 0.9.2 remove warning due to relative paths. 
 * 0.9.1 Make the merging options compulsory. Users must tell whether they want to
   merge the lanes or not. This avoid to do the merging or not whereas the
