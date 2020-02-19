@@ -28,3 +28,28 @@ mapping:
                 type: str
             "indir": 
                 type: str
+
+    "bcl2fastq":
+        type: map
+        mapping:
+            "threads":
+                type: int
+            "barcode_mismatch": 
+                type: int
+            "sample_sheet_file":
+                type: str
+            "output_directory":
+                type: str
+            "ignore_missing_controls":
+                type: bool
+            "ignore_missing_bcls":
+                type: bool
+            "no_bgzf_compression":
+                type: bool
+            "options":
+                type: str 
+            "merge_all_lanes":
+                type: bool
+            "write_fastq_reverse_complement":
+                type: bool
+

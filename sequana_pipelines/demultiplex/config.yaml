@@ -25,6 +25,4 @@ bcl2fastq:
     merge_all_lanes: False
     write_fastq_reverse_complement: False
 
-onsuccess:
-    toclean: " slurm*out demultiplex.rules config.yaml stats.txt "
 

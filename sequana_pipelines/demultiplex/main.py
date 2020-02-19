@@ -26,7 +26,7 @@ class Options(argparse.ArgumentParser):
 
             For a local run, use :
 
-                sequana_pipelines_demultiplex --bcl-directory PATH_TO_DATA --samplesheet SampleSheet.csv
+                sequana_pipelines_demultiplex --bcl-directory PATH_TO_DATA --sample-sheet SampleSheet.csv
 
 
         """
@@ -53,15 +53,18 @@ class Options(argparse.ArgumentParser):
         pipeline_group = self.add_argument_group("pipeline")
 
         pipeline_group.add_argument("--threads", dest="threads", default=4,
-            type=int, help="Number of threads to use during the demultiplexing")
+            type=int, help="Number of threads to use during the demultiplexing. ")
         pipeline_group.add_argument("--barcode-mismatch", dest="mismatch", default=0, type=int)
         pipeline_group.add_argument("--merging-strategy", required=True,
             dest="merging_strategy", choices=["merge", "none"], 
             help="""Merge Lanes of not. Set to 'merge' to merge all lanes. Set
             to 'none' to NOT merge the lanes""")
-        pipeline_group.add_argument("--bcl-directory", dest="bcl_directory")
-        pipeline_group.add_argument("--samplesheet", dest="samplesheet", 
-            default="SampleSheet.csv")
+        pipeline_group.add_argument("--bcl-directory", dest="bcl_directory",
+            required=True, help="""Directory towards the raw BCL files. This directory should
+            contains files such as RunParameters.xml, RunInfo.xml """)
+        pipeline_group.add_argument("--sample-sheet", dest="samplesheet",
+            required=True,
+            default="SampleSheet.csv", help="Sample sheet filename to be used")
         pipeline_group.add_argument("--ignore-missing-controls", 
             dest="ignore_missing_controls", action="store_true", default=True)
         pipeline_group.add_argument("--ignore-missing-bcls",
@@ -88,9 +91,22 @@ def main(args=None):
     # create the beginning of the command and the working directory
     manager.setup()
 
-    # fill the config file with input parameters
-    if os.path.exists(options.samplesheet) is False:
-        raise IOError("Please provide an existing sample sheet file with --samplesheet")
+    # fill the config file with input parameters. First, let us check some input
+    # files
+    manager.exists(options.samplesheet)
+    manager.exists(options.bcl_directory)
+
+    runparam = options.bcl_directory + os.sep + "RunParameters.xml"
+    manager.exists(runparam, warning_only=True)
+
+    if os.path.exists(runparam):
+        with open(runparam, "r") as fin:
+            data = fin.read()
+            if "NextSeq" in data and options.merging_strategy == "none":
+                logger.warning("This looks like a NextSeq run. You set "
+"merging_strategy to none. Most probably you want to merge the lanes. Use "
+"'--merging-strategy merge' instead")
+
 
     cfg = manager.config.config
     cfg.input_directory = os.path.abspath(options.bcl_directory)
@@ -98,9 +114,6 @@ def main(args=None):
     cfg.bcl2fastq.barcode_mismatch = options.mismatch
     cfg.bcl2fastq.sample_sheet_file = os.path.abspath(options.samplesheet)
 
-    if os.path.exists(options.samplesheet) is False:
-        logger.error("Input Samplesheet {} not found. ".format(options.samplesheet))
-        sys.exit(1)
 
     # this is defined by the working_directory
     cfg.bcl2fastq.output_directory = "."
