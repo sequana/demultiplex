@@ -1,0 +1,10 @@
+language: Snakemake 
+name: sequana_demultiplex
+description: Runs bcl2fastq on raw BCL data and creates plots to ease the QC validation
+url: https://github.com/sequana/sequana_demultiplex/blob/master/sequana_pipelines/demultiplex/demultiplex.rules
+categories: [HTS] 
+authors:   
+    - firstname: Thomas
+    - lastname: Cokelaer
+    - email: thomas.cokelaer@pasteur.fr
+
