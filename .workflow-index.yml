@@ -5,6 +5,6 @@ url: https://github.com/sequana/sequana_demultiplex/blob/master/sequana_pipeline
 categories: [HTS] 
 authors:   
     - firstname: Thomas
-    - lastname: Cokelaer
-    - email: thomas.cokelaer@pasteur.fr
+      lastname: Cokelaer
+      email: thomas.cokelaer@pasteur.fr
 
