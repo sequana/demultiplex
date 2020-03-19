@@ -98,21 +98,35 @@ def main(args=None):
     manager.exists(options.samplesheet)
     manager.exists(options.bcl_directory)
 
-    runparam = options.bcl_directory + os.sep + "RunParameters.xml"
-    manager.exists(runparam, warning_only=True)
-    with open(runparam, "r") as fin:
-        data = fin.read()
-        if "NextSeq" in data and options.merging_strategy != "merge":
-            if options.merging_strategy == "none_and_force":
-                msg = "This is a NextSeq. You set the --merging-strategy to"
-                msg += " none_and_force. So, we proceed with no merging strategy"
-                logger.warning(msg)
-            if options.merging_strategy == "none":
-                msg = "This is a NEXTSEQ run. You must set the "
-                msg += " --merging-strategy to 'merge'."
-                logger.warning(msg)
-                sys.exit(1)
+    # NextSeq
+    runparam_1 = options.bcl_directory + os.sep + "RunParameters.xml"
 
+    # HiSeq
+    runparam_2 = options.bcl_directory + os.sep + "runParameters.xml"
+
+    if os.path.exists(runparam_1):
+        runparam = runparam_1
+    elif os.path.exists(runparam_2):
+        runparam = runparam_2
+    else:
+        runparam = None
+        logger.warning("RunParameters.xml or runParameters.xml file not found")
+
+    manager.exists(runparam, warning_only=True)
+
+    if runparam:
+        with open(runparam, "r") as fin:
+            data = fin.read()
+            if "NextSeq" in data and options.merging_strategy != "merge":
+                if options.merging_strategy == "none_and_force":
+                    msg = "This is a NextSeq. You set the --merging-strategy to"
+                    msg += " none_and_force. So, we proceed with no merging strategy"
+                    logger.warning(msg)
+                if options.merging_strategy == "none":
+                    msg = "This is a NEXTSEQ run. You must set the "
+                    msg += " --merging-strategy to 'merge'."
+                    logger.warning(msg)
+                    sys.exit(1)
 
 
     cfg = manager.config.config
