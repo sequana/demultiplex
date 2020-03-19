@@ -37,14 +37,13 @@ class Options(argparse.ArgumentParser):
 
         # add a new group of options to the parser
         # demultiplex requires lots of memory sometimes hence the 64G options
-        # 
+        #
         so = SlurmOptions(queue="biomics", memory="64000", cores=16)
         so.add_options(self)
 
         # add a snakemake group of options to the parser
         so = SnakemakeOptions(working_directory="fastq")
         so.add_options(self)
-
 
         so = GeneralOptions()
         so.add_options(self)
@@ -56,9 +55,12 @@ class Options(argparse.ArgumentParser):
             type=int, help="Number of threads to use during the demultiplexing. ")
         pipeline_group.add_argument("--barcode-mismatch", dest="mismatch", default=0, type=int)
         pipeline_group.add_argument("--merging-strategy", required=True,
-            dest="merging_strategy", choices=["merge", "none"], 
-            help="""Merge Lanes of not. Set to 'merge' to merge all lanes. Set
-            to 'none' to NOT merge the lanes""")
+            dest="merging_strategy", choices=["merge", "none", "none_force"], 
+            help="""Merge Lanes of not. options are : merge, none, none_and_force.
+            The 'merge' choice merges all lanes. The 'none' choice do NOT merge the lanes. 
+            For NextSeq runs, we should merge the lanes; if users demultiplex NextSeq 
+            and set this option to none, an error is raised. If you still want to 
+            skip the merging step, then set this option to 'none_and_force'""")
         pipeline_group.add_argument("--bcl-directory", dest="bcl_directory",
             required=True, help="""Directory towards the raw BCL files. This directory should
             contains files such as RunParameters.xml, RunInfo.xml """)
@@ -98,14 +100,19 @@ def main(args=None):
 
     runparam = options.bcl_directory + os.sep + "RunParameters.xml"
     manager.exists(runparam, warning_only=True)
+    with open(runparam, "r") as fin:
+        data = fin.read()
+        if "NextSeq" in data and options.merging_strategy != "merge":
+            if options.merging_strategy == "none_and_force":
+                msg = "This is a NextSeq. You set the --merging-strategy to"
+                msg += " none_and_force. So, we proceed with no merging strategy"
+                logger.warning(msg)
+            if options.merging_strategy == "none":
+                msg = "This is a NEXTSEQ run. You must set the "
+                msg += " --merging-strategy to 'merge'."
+                logger.warning(msg)
+                sys.exit(1)
 
-    if os.path.exists(runparam):
-        with open(runparam, "r") as fin:
-            data = fin.read()
-            if "NextSeq" in data and options.merging_strategy == "none":
-                logger.warning("This looks like a NextSeq run. You set "
-"merging_strategy to none. Most probably you want to merge the lanes. Use "
-"'--merging-strategy merge' instead")
 
 
     cfg = manager.config.config
@@ -114,7 +121,6 @@ def main(args=None):
     cfg.bcl2fastq.barcode_mismatch = options.mismatch
     cfg.bcl2fastq.sample_sheet_file = os.path.abspath(options.samplesheet)
 
-
     # this is defined by the working_directory
     cfg.bcl2fastq.output_directory = "."
     cfg.bcl2fastq.ignore_missing_controls= options.ignore_missing_controls
@@ -122,13 +128,13 @@ def main(args=None):
     cfg.bcl2fastq.no_bgzf_compression = options.no_bgzf_compression
     if options.merging_strategy == "merge":
         cfg.bcl2fastq.merge_all_lanes = True
-    elif options.merging_strategy == "none":
+    elif options.merging_strategy in  ["none", "none_and_force"]:
         cfg.bcl2fastq.merge_all_lanes = False
     cfg.bcl2fastq.write_fastq_reverse_complement = options.write_fastq_reverse_complement
 
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.
-    manager.teardown()
+    manager.teardown(check_input_files=False)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 This is is the **demultiplex** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ projet
 
-:Overview: Runs bcl2fastq on raw BCL data and create some QC plots to ease the QC step
+:Overview: Runs bcl2fastq on raw BCL data and creates plots to ease the QC validation
 :Input: A valid Illumina base calling directory
 :Output: a set of PNG files and the expected FastQ files
 :Status: production
@@ -68,6 +68,11 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.9.5     * Fix a regression bug due to new sequana release. We do not check 
+            the input file (fastq) since this is not a sequence analysis
+            pipeline
+          * Check whether it is a NextSeq run. If so, merging-strategy must be
+            set to 'merge'. Can be bypassed using --force
 0.9.4     * Check the presence of the bcl input directory and samplesheet. 
           * More help in the --help message. 
           * add  --sample-sheet option to replace --samplesheet option
