@@ -37,6 +37,12 @@ This launch a snakemake pipeline. If you are familiar with snakemake, you can re
 
 Or use `sequanix <https://sequana.readthedocs.io/en/master/sequanix.html>`_ interface.
 
+Would you need to merge the lane, please add the --merging-strategy argument
+followed by *merge*::
+
+    sequana_pipelines_demultiplex --bcl-directory bcl_data --merging-strategy merge
+   
+
 Requirements
 ~~~~~~~~~~~~
 
