@@ -74,6 +74,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.9.8     * fix typos
 0.9.7     * Use new release of sequana_pipetools
           * set matplotlib backend to agg
           * include a simple HTML report
