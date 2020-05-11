@@ -74,6 +74,9 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.9.7     * Use new release of sequana_pipetools
+          * set matplotlib backend to agg
+          * include a simple HTML report
 0.9.6     * Handle different RunParameter.xml name (NextSeq vs HiSeq)
 0.9.5     * Fix a regression bug due to new sequana release. We do not check 
             the input file (fastq) since this is not a sequence analysis

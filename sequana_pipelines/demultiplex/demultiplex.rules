@@ -12,11 +12,19 @@ module load bcl2fastq/2.20.0
 
 http://emea.support.illumina.com/downloads/bcl2fastq-conversion-software-v2-20.html?langsel=/fr/
 """
+from sequana import snaketools as sm
 import os
 import json
 
 # This must be defined before the include
 configfile: "config.yaml"
+
+# A convenient manager
+manager = sm.PipelineManager("multitax", config)
+manager.setup(globals(), mode="warning")
+
+import matplotlib
+matplotlib.use('Agg')
 
 # an alias
 cfg = config['bcl2fastq']
@@ -99,6 +107,11 @@ rule plot_summary:
         # save summary at the end because barplot output is not set.
         s.to_summary_reads(output.summary)
 
+#__rulegrpah__input == maanger.snakefile
+#__rulegraph__output = "rulegraph/rulegraph.svg"
+#include: sm.modules['rulegraph']
+#localrules: rulegraph
+
 
 onsuccess:
     shell("chmod -R g+w .")
@@ -109,4 +122,27 @@ onsuccess:
 
     sc.files_to_remove.append(toremove)
     sc.add_makefile()
+
+
+    from sequana.modules_report.summary import SummaryModule
+    intro = """<h2>Sequana_demultiplex pipeline</h2>
+    
+    <h2>summary</h2>
+    <img style="height:50%;width:50%" src="barcodes.png"></img><br>
+    <hr>
+    <img style="height:50%;width:50%" src="summary.png"></img><br>
+    """
+
+    data = {"inputs":cfg["input_directory"], 
+            "outputs": outdir, "html":None,
+            "snakefile": ".sequana/" + manager.name + ".rules",
+            "config": "config.yaml", "stats": "stats.txt", 
+            #"rulegraph": __rulegraph__output,
+            #"requirements": "inputs/requirements.txt"
+            }
+    s = SummaryModule(data, intro=intro)
+
+
+
+
     print("Once done, please clean up the directory using\n'make clean'")

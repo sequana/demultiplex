@@ -53,7 +53,7 @@ setup(
     packages = ["sequana_pipelines.demultiplex",
         'sequana_pipelines.demultiplex.data' ],
 
-    install_requires = "sequana>=0.8.0",
+    install_requires = "sequana_pipetools>=0.2", "sequana>=0.8.0",
 
     # This is recursive include of data files
     exclude_package_data = {"": ["__pycache__"]},

@@ -2,36 +2,20 @@ import sys
 import os
 import argparse
 
-from sequana.pipelines_common import *
-from sequana.snaketools import Module
-from sequana import logger
-logger.level = "INFO"
+from sequana_pipetools.options import *
+from sequana_pipetools.misc import Colors
+from sequana_pipetools.info import sequana_epilog, sequana_prolog
 
 col = Colors()
 
 NAME = "demultiplex"
-m = Module(NAME)
-m.is_executable()
 
 
 class Options(argparse.ArgumentParser):
-    def __init__(self, prog=NAME):
-        usage = col.purple(
-            """This script prepares the sequana pipeline demultiplex layout to
-            include the Snakemake pipeline and its configuration file ready to
-            use.
-
-            In practice, it copies the config file and the pipeline into a
-            directory (demultiplex) together with an executable script
-
-            For a local run, use :
-
-                sequana_pipelines_demultiplex --bcl-directory PATH_TO_DATA --sample-sheet SampleSheet.csv
-
-
-        """
-        )
+    def __init__(self, prog=NAME, epilog=None):
+        usage = col.purple(sequana_prolog.format(**{"name": NAME}))
         super(Options, self).__init__(usage=usage, prog=prog, description="",
+            epilog=epilog,
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
 
@@ -47,7 +31,6 @@ class Options(argparse.ArgumentParser):
 
         so = GeneralOptions()
         so.add_options(self)
-
 
         pipeline_group = self.add_argument_group("pipeline")
 
@@ -82,12 +65,26 @@ def main(args=None):
     if args is None:
         args = sys.argv
 
-    if "--version" in sys.argv:
-        print_version(NAME)
-        sys.exit(0)
+    #if "--version" in sys.argv:
+    #    from sequana_pipetools.misc import print_version
+    #    print_version(NAME)
+    #    sys.exit(0)
 
-    options = Options(NAME).parse_args(args[1:])
+    # whatever needs to be called by all pipeline before the options parsing
+    from sequana_pipetools.options import init_pipeline
+    init_pipeline(NAME)
 
+    # option parsing including common epilog
+    options = Options(NAME, epilog=sequana_epilog).parse_args(args[1:])
+
+    from sequana.snaketools import Module
+    m = Module(NAME)
+    m.is_executable()
+
+    from sequana import logger
+    from sequana.pipelines_common import PipelineManager
+    logger.level = "INFO"
+    # the real stuff is here
     manager = PipelineManager(options, NAME)
 
     # create the beginning of the command and the working directory
