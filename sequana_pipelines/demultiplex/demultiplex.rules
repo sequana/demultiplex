@@ -21,7 +21,7 @@ configfile: "config.yaml"
 
 # A convenient manager
 manager = sm.PipelineManagerDirectory("demultiplex", config)
-manager.setup(globals(), mode="warning")
+manager.setup(globals(), mode="error")
 
 # an alias
 cfg = config['bcl2fastq']
@@ -38,6 +38,7 @@ rule all:
         outdir + "/undetermined_barcodes.csv",
         outdir + "/barcodes.png",
         outdir + "/summary.png",
+        "rulegraph/rulegraph.svg",
 
 
 rule plot_unknown_barcodes:
@@ -104,10 +105,11 @@ rule plot_summary:
         # save summary at the end because barplot output is not set.
         s.to_summary_reads(output.summary)
 
-#__rulegrpah__input == maanger.snakefile
-#__rulegraph__output = "rulegraph/rulegraph.svg"
-#include: sm.modules['rulegraph']
-#localrules: rulegraph
+__rulegraph__input = manager.snakefile
+__rulegraph__output = "rulegraph/rulegraph.svg"
+__rulegraph__mapper = {}
+include: sm.modules['rulegraph']
+localrules: rulegraph
 
 
 onsuccess:
@@ -120,26 +122,22 @@ onsuccess:
     sc.files_to_remove.append(toremove)
     sc.add_makefile()
 
-
-    from sequana.modules_report.summary import SummaryModule
-    intro = """<h2>Sequana_demultiplex pipeline</h2>
-    
-    <h2>summary</h2>
-    <img style="height:50%;width:50%" src="barcodes.png"></img><br>
-    <hr>
-    <img style="height:50%;width:50%" src="summary.png"></img><br>
-    """
-
-    data = {"inputs":cfg["input_directory"], 
-            "outputs": outdir, "html":None,
-            "snakefile": ".sequana/" + manager.name + ".rules",
-            "config": "config.yaml", "stats": "stats.txt", 
-            #"rulegraph": __rulegraph__output,
-            #"requirements": "inputs/requirements.txt"
-            }
-    s = SummaryModule(data, intro=intro)
-
-
-
+    # For a future version
+    #from sequana.modules_report.summary import SummaryModule
+    #intro = """<h2>Sequana_demultiplex pipeline</h2>
+    #<img style="height:50%;width:50%" src="barcodes.png"></img><br>
+    #<hr>
+    #<img style="height:50%;width:50%" src="summary.png"></img><br>
+    #"""
+    #data = {"inputs": [], 
+    #        "outputs": [],
+    #        "html": None,
+    #        "snakefile": ".sequana/" + manager.name + ".rules",
+    #        "config": "config.yaml", 
+    #        "stats": "stats.txt", 
+    #        "rulegraph": __rulegraph__output,
+    #        "requirements": "inputs/requirements.txt"
+    #        }
+    #s = SummaryModule(data, intro=intro)
 
     print("Once done, please clean up the directory using\n'make clean'")
