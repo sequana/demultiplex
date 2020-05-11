@@ -20,11 +20,8 @@ import json
 configfile: "config.yaml"
 
 # A convenient manager
-manager = sm.PipelineManager("multitax", config)
+manager = sm.PipelineManagerDirectory("demultiplex", config)
 manager.setup(globals(), mode="warning")
-
-import matplotlib
-matplotlib.use('Agg')
 
 # an alias
 cfg = config['bcl2fastq']
