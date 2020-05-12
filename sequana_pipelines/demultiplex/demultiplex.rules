@@ -38,7 +38,7 @@ rule all:
         outdir + "/undetermined_barcodes.csv",
         outdir + "/barcodes.png",
         outdir + "/summary.png",
-        "rulegraph/rulegraph.svg",
+        ".sequana/rulegraph.svg",
 
 
 rule plot_unknown_barcodes:
@@ -106,7 +106,7 @@ rule plot_summary:
         s.to_summary_reads(output.summary)
 
 __rulegraph__input = manager.snakefile
-__rulegraph__output = "rulegraph/rulegraph.svg"
+__rulegraph__output = ".sequana/rulegraph.svg"
 __rulegraph__mapper = {}
 include: sm.modules['rulegraph']
 localrules: rulegraph
@@ -115,19 +115,26 @@ localrules: rulegraph
 onsuccess:
     shell("chmod -R g+w .")
     manager.teardown()
-    manager.plot_stats(N=len(manager.samples))
 
-    from sequana.modules_report.summary import SummaryModule
-    intro = """<h2>Sequana_demultiplex pipeline</h2>
-    <img style="height:50%;width:50%" src="barcodes.png"></img><br>
-    <hr>
-    <img style="height:50%;width:50%" src="summary.png"></img><br>
-    """
+    from sequana.modules_report.summary import SummaryModule2
+
+    image1 = SummaryModule2.png_to_embedded_png("dummy", "barcodes.png", 
+                style="align:center; width:60%; height:40%")
+
+    image2 = SummaryModule2.png_to_embedded_png("dummy", "summary.png", 
+                style="align:center; width:60%; height:40%")
+    
+    intro = """<div>The following image shows the indices found in the Undetermined data sets. An excess may indicate a wrong SampleSheet.</div> {} <hr> The following image shows the ratio of determined/undetermined reads after demultiplexing. Again, an excess of undetermined (larger than 10-20%) may indicate a wrongly labelled sample in your sample sheet. {} """.format(image1, image2)
+
+
     data = {
-            "snakefile": ".sequana/" + manager.name + ".rules",
-            "config": "config.yaml", 
+            "name": manager.name,
             "stats": "stats.txt", 
             "rulegraph": __rulegraph__output,
             }
-    s = SummaryModule(data, intro=intro)
+    s = SummaryModule2(data, intro=intro)
+    shell("rm -rf rulegraph")
+
+onerror:
+    print("An error occurred. See message above.")
 

@@ -74,8 +74,9 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
-0.9.9     * simplification of the pipeline to use sequana 0.8.4
-          * simple summary plot
+0.9.9     * simplification of the pipeline to use sequana 0.8.4 to speed up 
+            the --help calls.
+          * include a summary HTML report 
 0.9.8     * fix typos
 0.9.7     * Use new release of sequana_pipetools
           * set matplotlib backend to agg
