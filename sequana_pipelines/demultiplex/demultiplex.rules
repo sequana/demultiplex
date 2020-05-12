@@ -114,30 +114,20 @@ localrules: rulegraph
 
 onsuccess:
     shell("chmod -R g+w .")
-    from sequana.snaketools import OnSuccessCleaner
-    sc = OnSuccessCleaner()
-    sc.files_to_remove.append("demultiplex.rules")
-    toremove = " slurm*out demultiplex.rules config.yaml stats.txt "
+    manager.teardown()
+    manager.plot_stats(N=len(manager.samples))
 
-    sc.files_to_remove.append(toremove)
-    sc.add_makefile()
+    from sequana.modules_report.summary import SummaryModule
+    intro = """<h2>Sequana_demultiplex pipeline</h2>
+    <img style="height:50%;width:50%" src="barcodes.png"></img><br>
+    <hr>
+    <img style="height:50%;width:50%" src="summary.png"></img><br>
+    """
+    data = {
+            "snakefile": ".sequana/" + manager.name + ".rules",
+            "config": "config.yaml", 
+            "stats": "stats.txt", 
+            "rulegraph": __rulegraph__output,
+            }
+    s = SummaryModule(data, intro=intro)
 
-    # For a future version
-    #from sequana.modules_report.summary import SummaryModule
-    #intro = """<h2>Sequana_demultiplex pipeline</h2>
-    #<img style="height:50%;width:50%" src="barcodes.png"></img><br>
-    #<hr>
-    #<img style="height:50%;width:50%" src="summary.png"></img><br>
-    #"""
-    #data = {"inputs": [], 
-    #        "outputs": [],
-    #        "html": None,
-    #        "snakefile": ".sequana/" + manager.name + ".rules",
-    #        "config": "config.yaml", 
-    #        "stats": "stats.txt", 
-    #        "rulegraph": __rulegraph__output,
-    #        "requirements": "inputs/requirements.txt"
-    #        }
-    #s = SummaryModule(data, intro=intro)
-
-    print("Once done, please clean up the directory using\n'make clean'")
