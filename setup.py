@@ -1,7 +1,9 @@
--# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # License: 3-clause BSD
-__revision__ = "$Id: $" # for the SVN Id
 from setuptools import setup, find_namespace_packages
+from setuptools.command.develop import develop
+from setuptools.command.install import install
+import subprocess
 
 _MAJOR               = 0
 _MINOR               = 9
@@ -33,6 +35,7 @@ metainfo = {
           'Topic :: Scientific/Engineering :: Physics']
     }
 
+NAME = "demultiplex"
 
 class Install(install):
     def run(self):
@@ -67,7 +70,7 @@ setup(
     packages = ["sequana_pipelines.demultiplex",
         'sequana_pipelines.demultiplex.data' ],
 
-    install_requires = open("requirements.txt").read()
+    install_requires = open("requirements.txt").read(),
 
     # This is recursive include of data files
     exclude_package_data = {"": ["__pycache__"]},
@@ -84,4 +87,4 @@ setup(
     }
 
 )
--
+

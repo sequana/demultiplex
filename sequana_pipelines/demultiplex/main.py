@@ -131,7 +131,7 @@ def main(args=None):
         cfg = manager.config.config
         cfg.input_directory = os.path.abspath(options.bcl_directory)
         cfg.bcl2fastq.threads = options.threads
-       cfg.bcl2fastq.barcode_mismatch = options.mismatch
+        cfg.bcl2fastq.barcode_mismatch = options.mismatch
         cfg .bcl2fastq.sample_sheet_file = os.path.abspath(options.samplesheet)
 
         # this is defined by the working_directory
