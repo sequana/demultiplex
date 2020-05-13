@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
+-# -*- coding: utf-8 -*-
 # License: 3-clause BSD
 __revision__ = "$Id: $" # for the SVN Id
 from setuptools import setup, find_namespace_packages
 
 _MAJOR               = 0
 _MINOR               = 9
-_MICRO               = 9
+_MICRO               = 10
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -34,8 +34,22 @@ metainfo = {
     }
 
 
+class Install(install):
+    def run(self):
+        cmd = "sequana_completion --name {} --force ".format(NAME)
+        try: subprocess.run(cmd.split())
+        except:pass
+        install.run(self)
+
+class Develop(develop):
+    def run(self):
+        cmd = "sequana_completion --name {} --force ".format(NAME)
+        try:subprocess.run(cmd.split())
+        except:pass
+        develop.run(self)
+
 setup(
-    name             = "sequana_demultiplex",
+    name             = "sequana_{}".format(NAME),
     version          = version,
     maintainer       = metainfo['authors']['main'][0],
     maintainer_email = metainfo['authors']['main'][1],
@@ -53,13 +67,13 @@ setup(
     packages = ["sequana_pipelines.demultiplex",
         'sequana_pipelines.demultiplex.data' ],
 
-    install_requires = ["sequana_pipetools>=0.2", "sequana>=0.8.0"],
+    install_requires = open("requirements.txt").read()
 
     # This is recursive include of data files
     exclude_package_data = {"": ["__pycache__"]},
     package_data = {
-        '': ['config.yaml', "demultiplex.rules", "*json", "requirements.txt", "*png"],
-        'sequana_pipelines.demultiplex.data' : ['*.*'], 
+        '': ['*.yaml', "*.rules", "*.json", "requirements.txt", "*png"],
+        'sequana.pipelines.demultiplex.data' : ['*.*'], 
         },
 
     zip_safe=False,
@@ -70,3 +84,4 @@ setup(
     }
 
 )
+-

@@ -74,6 +74,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.9.10    * implement the new option --from-project, add missing MANIFEST
 0.9.9     * simplification of the pipeline to use sequana 0.8.4 to speed up 
             the --help calls.
           * include a summary HTML report 
