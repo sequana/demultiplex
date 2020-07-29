@@ -74,7 +74,7 @@ class Options(argparse.ArgumentParser):
         pipeline_group.add_argument("--write-fastq-reverse-complement",
             dest="write_fastq_reverse_complement", action="store_true", default=True)
  
-        pipeline_group.add_argument("--run", default=False, action="store_true",
+        self.add_argument("--run", default=False, action="store_true",
             help="execute the pipeline directly")
 
     def parse_args(self, *args):
