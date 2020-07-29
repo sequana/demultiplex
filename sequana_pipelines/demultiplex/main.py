@@ -1,6 +1,23 @@
+# -*- coding: utf-8 -*-
+#
+#  This file is part of Sequana software
+#
+#  Copyright (c) 2016 - Sequana Development Team
+#
+#  File author(s):
+#      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
+#
+#  Distributed under the terms of the 3-clause BSD license.
+#  The full license is in the LICENSE file, distributed with this software.
+#
+#  website: https://github.com/sequana/sequana
+#  documentation: http://sequana.readthedocs.io
+#
+##############################################################################
 import sys
 import os
 import argparse
+import subprocess
 
 from sequana_pipetools.options import *
 from sequana_pipetools.misc import Colors
@@ -50,14 +67,15 @@ class Options(argparse.ArgumentParser):
         pipeline_group.add_argument("--sample-sheet", dest="samplesheet",
             required=True,
             default="SampleSheet.csv", help="Sample sheet filename to be used")
-        pipeline_group.add_argument("--ignore-missing-controls", 
-            dest="ignore_missing_controls", action="store_true", default=True)
         pipeline_group.add_argument("--ignore-missing-bcls",
             dest="ignore_missing_bcls", action="store_true", default=True)
         pipeline_group.add_argument("--no-bgzf-compression",
             dest="no_bgzf_compression", action="store_true", default=True)
         pipeline_group.add_argument("--write-fastq-reverse-complement",
             dest="write_fastq_reverse_complement", action="store_true", default=True)
+ 
+        pipeline_group.add_argument("--run", default=False, action="store_true",
+            help="execute the pipeline directly")
 
     def parse_args(self, *args):
         args_list = list(*args)
@@ -91,11 +109,15 @@ def main(args=None):
 
     # create the beginning of the command and the working directory
     manager.setup()
-
+    from sequana import logger
+    logger.level = options.level
     # fill the config file with input parameters. First, let us check some input
     # files
     manager.exists(options.samplesheet)
     manager.exists(options.bcl_directory)
+
+    from sequana_pipelines.demultiplex import check_samplesheet
+    status = check_samplesheet.check_samplesheet(options.samplesheet)
 
     # NextSeq
     runparam_1 = options.bcl_directory + os.sep + "RunParameters.xml"
@@ -122,7 +144,7 @@ def main(args=None):
                     msg += " none_and_force. So, we proceed with no merging strategy"
                     logger.warning(msg)
                 if options.merging_strategy == "none":
-                    msg = "This is a NEXTSEQ run. You must set the "
+                    msg = "This is a NextSeq run. You must set the "
                     msg += " --merging-strategy to 'merge'."
                     logger.warning(msg)
                     sys.exit(1)
@@ -132,11 +154,10 @@ def main(args=None):
         cfg.input_directory = os.path.abspath(options.bcl_directory)
         cfg.bcl2fastq.threads = options.threads
         cfg.bcl2fastq.barcode_mismatch = options.mismatch
-        cfg .bcl2fastq.sample_sheet_file = os.path.abspath(options.samplesheet)
+        cfg.bcl2fastq.samplesheet_file = os.path.abspath(options.samplesheet)
 
         # this is defined by the working_directory
         cfg.bcl2fastq.output_directory = "."
-        cfg.bcl2fastq.ignore_missing_controls= options.ignore_missing_controls
         cfg.bcl2fastq.ignore_missing_bcls = options.ignore_missing_bcls
         cfg.bcl2fastq.no_bgzf_compression = options.no_bgzf_compression
         if options.merging_strategy == "merge":
@@ -148,7 +169,10 @@ def main(args=None):
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.
     manager.teardown(check_input_files=False)
+ 
 
+    if options.run:
+        subprocess.Popen(["sh", '{}.sh'.format(NAME)], cwd=options.workdir)
 
 if __name__ == "__main__":
     main()

@@ -1,13 +1,11 @@
-"""Phix removal pipeline
+"""Demultiplex pipeline
 
 Author: Thomas Cokelaer
-Affiliation: Institut Pasteur @ 2018
+Affiliation: Institut Pasteur @ 2020
 
 This pipeline is part of Sequana software (sequana.readthedocs.io)
 
-
-
-module load bcl2fastq/2.20.0
+You will need bcl2fastq/2.20.0 Please see REAME and wiki on https://github.com/sequana/sequana_demultiplex
 
 
 http://emea.support.illumina.com/downloads/bcl2fastq-conversion-software-v2-20.html?langsel=/fr/
@@ -27,9 +25,12 @@ manager.setup(globals(), mode="error")
 cfg = config['bcl2fastq']
 outdir = os.path.abspath(cfg["output_directory"])
 
-if cfg["sample_sheet_file"].strip() != "":
-    if os.path.exists(cfg['sample_sheet_file']) is False:
-        raise IOError("Sample sheet {} does not exist".format(cfg['sample_sheet_file']))
+if cfg["samplesheet_file"].strip() != "":
+    if os.path.exists(cfg['samplesheet_file']) is False:
+        raise IOError("Sample sheet {} does not exist".format(cfg['samplesheet_file']))
+
+
+
 
 
 rule all:
@@ -37,6 +38,7 @@ rule all:
         outdir + "/Stats/summary.txt",
         outdir + "/undetermined_barcodes.csv",
         outdir + "/barcodes.png",
+        outdir + "/samples.png",
         outdir + "/summary.png",
         ".sequana/rulegraph.svg",
 
@@ -54,15 +56,23 @@ rule plot_unknown_barcodes:
         savefig(output.png, dpi=200)
         df.to_csv(output.csv)
 
+rule check_samplesheet:
+    input: cfg['samplesheet_file']
+    output: temp("ss.log")
+    shell:
+        """
+        sequana_check_samplesheet -s {input[0]} 2> {output[0]}
+        """
+
 
 rule bcl2fastq:
-    input:
+    input: "ss.log"
     output:
         outdir + "/Stats/Stats.json",
     params:
         indir= config["input_directory"],
         outdir= outdir,
-        sample_sheet=cfg['sample_sheet_file'],
+        samplesheet=cfg['samplesheet_file'],
         barcode_mismatch=cfg['barcode_mismatch']
     threads: cfg['threads']
     run:
@@ -71,12 +81,13 @@ rule bcl2fastq:
         #cmd += " --input-dir {}/Data/Intensities/BaseCalls".format(params.indir)
         cmd += " --runfolder-dir {}".format(params.indir)
         cmd += " --intensities-dir {}/Data/Intensities".format(params.indir)
-        if params.sample_sheet.strip()!= "":
-            cmd += " --sample-sheet {}".format(params.sample_sheet)
+        if params.samplesheet.strip()!= "":
+            cmd += " --sample-sheet {}".format(params.samplesheet)
         cmd += " --output-dir {}".format(os.path.abspath(params.outdir))
 
-        if cfg['ignore_missing_controls']:
-            cmd += " --ignore-missing-controls "
+        # deprecated according to bcl2fastq documentation 2.20
+        #if cfg['ignore_missing_controls']:
+        #    cmd += " --ignore-missing-controls "
         if cfg['ignore_missing_bcls']:
             cmd += " --ignore-missing-bcls "
         if cfg['no_bgzf_compression']:
@@ -91,6 +102,15 @@ rule bcl2fastq:
         cmd += cfg['options']
 
         shell(cmd)
+
+rule plot_barplot_samples:
+    input: outdir + "/Stats/Stats.json"
+    output:
+        barplot=outdir + "/samples.png"
+    run:
+        from sequana.demultiplex import StatsFile
+        s = StatsFile(input[0])
+        s.barplot_per_sample(filename=output.barplot)
 
 
 rule plot_summary:
@@ -109,7 +129,7 @@ __rulegraph__input = manager.snakefile
 __rulegraph__output = ".sequana/rulegraph.svg"
 __rulegraph__mapper = {}
 include: sm.modules['rulegraph']
-localrules: rulegraph
+localrules: rulegraph, check_samplesheet
 
 
 onsuccess:
@@ -118,19 +138,24 @@ onsuccess:
 
     from sequana.modules_report.summary import SummaryModule2
 
-    image1 = SummaryModule2.png_to_embedded_png("dummy", "barcodes.png", 
+    image1 = SummaryModule2.png_to_embedded_png("dummy", "barcodes.png",
                 style="align:center; width:60%; height:40%")
 
-    image2 = SummaryModule2.png_to_embedded_png("dummy", "summary.png", 
+    image2 = SummaryModule2.png_to_embedded_png("dummy", "summary.png",
                 style="align:center; width:60%; height:40%")
-    
-    intro = """<div>The following image shows the indices found in the Undetermined data sets. An excess may indicate a wrong SampleSheet.</div> {} <hr> The following image shows the ratio of determined/undetermined reads after demultiplexing. Again, an excess of undetermined (larger than 10-20%) may indicate a wrongly labelled sample in your sample sheet. {} """.format(image1, image2)
+
+    image3 = SummaryModule2.png_to_embedded_png("dummy", "samples.png",
+                style="align:center; width:60%; height:40%")
 
 
+    intro = """<div>The following image shows the indices found in the most Undetermined barcodes per lane. An index in excess may indicate a wrong SampleSheet with a typo in a given index.</div> {} <hr> The following image shows the ratio of determined/undetermined reads after demultiplexing. Again, an excess of undetermined (larger than 10-20%) may indicate a wrongly labelled sample in your sample sheet. {} <hr> The following image is similar. Instead of showing the index, we show here the number of reads per sample.{}""".format(image1, image2, image3)
+
+    from sequana_pipelines import demultiplex
     data = {
             "name": manager.name,
             "stats": "stats.txt", 
             "rulegraph": __rulegraph__output,
+            "pipeline_version": demultiplex.version
             }
     s = SummaryModule2(data, intro=intro)
     shell("rm -rf rulegraph")

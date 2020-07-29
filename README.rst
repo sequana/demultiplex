@@ -4,6 +4,9 @@ This is is the **demultiplex** pipeline from the `Sequana <https://sequana.readt
 :Input: A valid Illumina base calling directory
 :Output: a set of PNG files and the expected FastQ files
 :Status: production
+:Wiki: https://github.com/sequana/sequana_demultiplex/wiki
+:Documentation: This README file, the Wiki from the github repository (link
+above) and sequana.readthedocs.io
 :Citation: Cokelaer et al, (2017), 'Sequana': a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI https://doi:10.21105/joss.00352
 
 
@@ -24,16 +27,16 @@ Usage
 ::
 
     sequana_pipelines_demultiplex --help
-    sequana_pipelines_demultiplex --working-directory DATAPATH --bcl-directory bcldata
+    sequana_pipelines_demultiplex --working-directory DATAPATH --bcl-directory bcldata --samplesheet SampleSheet.csv
 
 This creates a directory **fastq**. You just need to execute the pipeline::
 
-    cd demutliplex
-    sh demutliplex.sh  # for a local run
+    cd demultiplex
+    sh demultiplex.sh  # for a local run
 
-This launch a snakemake pipeline. If you are familiar with snakemake, you can retrieve the demutliplex.rules and config.yaml files and then execute the pipeline yourself with specific parameters::
+This launch a snakemake pipeline. If you are familiar with snakemake, you can retrieve the demultiplex.rules and config.yaml files and then execute the pipeline yourself with specific parameters::
 
-    snakemake -s demutliplex.rules --cores 4 --stats stats.txt
+    snakemake -s demultiplex.rules --cores 4 --stats stats.txt
 
 Or use `sequanix <https://sequana.readthedocs.io/en/master/sequanix.html>`_ interface.
 
@@ -41,7 +44,7 @@ Would you need to merge the lane, please add the --merging-strategy argument
 followed by *merge*::
 
     sequana_pipelines_demultiplex --bcl-directory bcl_data --merging-strategy merge
-   
+
 
 Requirements
 ~~~~~~~~~~~~
@@ -51,22 +54,33 @@ This pipelines requires the following executable(s):
 - bcl2fastq 2.20.0
 
 
-.. image:: https://raw.githubusercontent.com/sequana/sequana_demultiplex/master/sequana_pipelines/demultiplex/dag.png
 
+**bcl2fastq** should be present in your path. Most facilities have the tools
+installed. On cluster, modules provide the tool as well. If you do not have it,
+we provide a singularity image, which can be download as follow::
+
+    singularity pull bcl2fastq.img shub://cokelaer/ngstools:bcl2fastq
+
+Then, just add a script called **bc2fastq** in your binary PATH with is
+content::
+
+    singularity run PATH_TO_image/bcl2fastq.img ${1+"$@"}
 
 Details
 ~~~~~~~~~
+.. image:: https://raw.githubusercontent.com/sequana/sequana_demultiplex/master/sequana_pipelines/demultiplex/dag.png
 
 This pipeline runs bcl2fastq 2.20 and creates a set of diagnostics plots to help
 deciphering common issues such as missing index and sample sheet errors. 
 
 
-
 Rules and configuration details
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/sequana_demutliplex/master/sequana_pipelines/demutliplex/config.yaml>`_
+Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/sequana_demultiplex/master/sequana_pipelines/demultiplex/config.yaml>`_
 to be used with the pipeline. Each rule used in the pipeline may have a section in the configuration file. 
+
+
 
 Changelog
 ~~~~~~~~~
@@ -74,6 +88,14 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.9.11    * fix label in plot_summary, 
+          * add new plot to show reads per sample + undetermined
+          * add two tools one to check the samplesheet called 
+            sequana_sample_sheet and one called sequana_fix_samplesheet. The 
+            former is now inside the pipeline as well and when creating the
+            pipeline
+          * set --write_reverse_complement to False by default
+          * remove the --ignore-missing-control which is deprecated anyway
 0.9.10    * implement the new option --from-project, add missing MANIFEST
 0.9.9     * simplification of the pipeline to use sequana 0.8.4 to speed up 
             the --help calls.

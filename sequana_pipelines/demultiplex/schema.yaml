@@ -36,7 +36,7 @@ mapping:
                 type: int
             "barcode_mismatch": 
                 type: int
-            "sample_sheet_file":
+            "samplesheet_file":
                 type: str
             "output_directory":
                 type: str

@@ -3,24 +3,35 @@ From: sequana.img
 
 %labels
     Author thomas cokelaer
-    Version v1.0
+    Version v0.9.10
 
+%files
+    bcl2fastq2-v2.20.0.422-Linux-x86_64.rpm
 
 %post
+
+    #yum update -y
+    
+ apt-get install -y alien
+ alien bcl2fastq2-v2.20.0.422-Linux-x86_64.rpm
+ #dpkg -i bcl2fastq2-v2.20.0.422-Linux-x86_64.deb
+ dpkg -i bcl2fastq2_0v2.20.0.422-2_amd64.deb
+ #alien -i bcl2fastq2-v2.20.0.422-Linux-x86_64.rpm
+
+
+
+    #rm  bcl2fastq2-v2.20.0.422-Linux-x86_64.rpm
 
     export PATH=$PATH:/usr/local/anaconda/bin
     export LANG=C   # prevents perl for raising warnings
     export PERL5LIB=/usr/local/anaconda/lib/perl5/5.22.0
 
-    pip install sequana_demultiplex
-    #git clone git://github.com/sequana/sequana_demultiplex.git
-    #cd sequana_demultiplex
-    #python setup.py install
-	
+    pip install sequana_demultiplex==0.9.10
+
 %runscript
-    echo "Welcome to sequana fastqc pipeline"
-    exec sequana_pipelines_fastqc --version
-    exec sequana_pipelines_fastqc "$@"
+    echo "Welcome to sequana_demultiplex pipeline"
+  #  exec sequana_demultiplex --version
+  #  exec sequana_demultiplex "$@"
 
 
 
