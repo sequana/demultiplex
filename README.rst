@@ -87,6 +87,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+1.0.0     * stable version pinned on sequana libraries
 0.9.11    * fix label in plot_summary, 
           * add new plot to show reads per sample + undetermined
           * add two tools one to check the samplesheet called 

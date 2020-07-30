@@ -5,9 +5,9 @@ from setuptools.command.develop import develop
 from setuptools.command.install import install
 import subprocess
 
-_MAJOR               = 0
-_MINOR               = 9
-_MICRO               = 11
+_MAJOR               = 1
+_MINOR               = 0
+_MICRO               = 0
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
