@@ -87,6 +87,15 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+1.0.1     * change some default behaviour:
+            - write_fastq_reverse_complement is now set to False by default
+              like bcl2fastq
+            - The --no-bgzf-compression option is changed into
+              --bgzf-compression. We do not want this option by default.
+            - The --ignore-missing-bcls option is changed into
+              --no-ignore-missing-bcls so as to ignore missing bcls by default
+              keep this option as a flag and keep same behaviour
+          * Fix HTML syntax 
 1.0.0     * stable version pinned on sequana libraries
 0.9.11    * fix label in plot_summary, 
           * add new plot to show reads per sample + undetermined
