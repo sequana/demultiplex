@@ -67,13 +67,21 @@ class Options(argparse.ArgumentParser):
         pipeline_group.add_argument("--sample-sheet", dest="samplesheet",
             required=True,
             default="SampleSheet.csv", help="Sample sheet filename to be used")
-        pipeline_group.add_argument("--ignore-missing-bcls",
-            dest="ignore_missing_bcls", action="store_true", default=True)
-        pipeline_group.add_argument("--no-bgzf-compression",
-            dest="no_bgzf_compression", action="store_true", default=True)
+        pipeline_group.add_argument("--no-ignore-missing-bcls",
+            dest="no_ignore_missing_bcls", action="store_true", default=False,
+            help="""In bcl2fastq, the option --ignore-missing-bcls implies that
+we assume 'N'/'#' for missing calls. In Sequana_demultiplex, we use that option
+by default. If you do not want that behviour, but the one from bcl2fastq, use
+this flag(--no-ignore-missing-bcls)""")
+        pipeline_group.add_argument("--bgzf-compression",
+            dest="bgzf_compression", action="store_true", default=False,
+            help="""turn on BGZF compression for FASTQ files. By default,
+bcl2fastq uses this option; By default we don't. Set --bgzl--compression flag to
+set it back""")
         pipeline_group.add_argument("--write-fastq-reverse-complement",
-            dest="write_fastq_reverse_complement", action="store_true", default=True)
- 
+            dest="write_fastq_reverse_complement", action="store_true",
+            default=False,
+            help="generate FASTQs containing reverse complements of actual data")
         self.add_argument("--run", default=False, action="store_true",
             help="execute the pipeline directly")
 
@@ -158,8 +166,8 @@ def main(args=None):
 
         # this is defined by the working_directory
         cfg.bcl2fastq.output_directory = "."
-        cfg.bcl2fastq.ignore_missing_bcls = options.ignore_missing_bcls
-        cfg.bcl2fastq.no_bgzf_compression = options.no_bgzf_compression
+        cfg.bcl2fastq.ignore_missing_bcls = not options.no_ignore_missing_bcls
+        cfg.bcl2fastq.no_bgzf_compression = not options.bgzf_compression
         if options.merging_strategy == "merge":
             cfg.bcl2fastq.merge_all_lanes = True
         elif options.merging_strategy in  ["none", "none_and_force"]:

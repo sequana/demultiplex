@@ -139,20 +139,33 @@ onsuccess:
     from sequana.modules_report.summary import SummaryModule2
 
     image1 = SummaryModule2.png_to_embedded_png("dummy", "barcodes.png",
-                style="align:center; width:60%; height:40%")
+                style="text-align:center; width:60%; height:40%", 
+                alt="barcodes")
 
     image2 = SummaryModule2.png_to_embedded_png("dummy", "summary.png",
-                style="align:center; width:60%; height:40%")
+                style="width:60%; height:40%", alt="summary")
 
     image3 = SummaryModule2.png_to_embedded_png("dummy", "samples.png",
-                style="align:center; width:60%; height:40%")
+                style="width:60%; height:40%", alt="sample")
 
 
-    intro = """<div>This report summarizes the demultiplexing of your raw data. Some help to interpret the following plots can be found on the pipeline <a href="https://github.com/sequana/sequana_demultiplex">home page</a> and  <a href="https://github.com/sequana/sequana_demultiplex/wiki"> wiki</a>.
+    intro = """<div>
+<p style="text-align:justify">This report summarizes the demultiplexing of your raw data. Some help to interpret the following plots can be found on the pipeline <a href="https://github.com/sequana/sequana_demultiplex">home page</a> and  <a href="https://github.com/sequana/sequana_demultiplex/wiki"> wiki</a>.</p>
+
+<br>
 <br>
 
-<br>
-The following image shows the indices found in the most Undetermined barcodes per lane. An index in excess may indicate a wrong SampleSheet with a typo in a given index. {} <hr> The following image shows the ratio of determined/undetermined reads after demultiplexing. Again, an excess of undetermined (larger than 10-20%) may indicate a wrongly labelled sample in your sample sheet. {} <br><hr> The following image is similar. Instead of showing the index, we show here the number of reads per sample.<br>{}</div>""".format(image1, image2, image3)
+<p style="text-align:justify">The following image shows the indices found in the most Undetermined barcodes per lane. An index in excess may indicate a wrong SampleSheet with a typo in a given index.</p> 
+<br><br>{} <hr> 
+<p style="text-align:justify">
+The following image shows the ratio of determined/undetermined reads after demultiplexing. Again, an excess of undetermined (larger than 10-20%) may indicate a wrongly labelled sample in your sample sheet.
+</p>  <br><br>{}<hr> 
+<p style="text-align:justify">
+The following image is similar. Instead of showing the index, we show here the number of reads per sample.</p>
+<br>{}
+
+
+</div>""".format(image1, image2, image3)
 
     from sequana_pipelines import demultiplex
     data = {
