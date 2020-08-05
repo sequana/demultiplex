@@ -69,7 +69,8 @@ and accept the agreements. Install it using the RPM if you have a debian-like sy
     rpm install file.rpm
 
 If you do not have a debian system, you can look at https://damona.readthedocs.io where we provide
-a singularity recipes to build an image from your own  rpm.
+a singularity recipes to build an image from your own  rpm. Recipes can be found
+`here <https://github.com/cokelaer/damona/tree/master/damona/recipes/bcl2fastq>`_.
 
 
 
