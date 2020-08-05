@@ -48,22 +48,30 @@ followed by *merge*::
 Requirements
 ~~~~~~~~~~~~
 
-This pipelines requires the following executable(s):
+This pipelines requires the following third-party tool(s):
 
 - bcl2fastq 2.20.0
 
+This software has an end-user license agreement (EULA). Given the EULA details
+of this software, it cannot be distributed by us but only by Illumina.
+Therefore, you should install it yourself. On cluster facility, you may ask to
+your system administator. For instance::
+
+    module load bcl2fastq/2.20.0
+
+For the same reason you cannot find it on community such as bioconda or docker (aug 2020).
+
+So, you will need to download the code yourself. The easiest is to download the
+RPM from `Illumina
+<https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software/downloads.html>`_
+and accept the agreements. Install it using the RPM if you have a debian-like system::
+
+    rpm install file.rpm
+
+If you do not have a debian system, you can look at https://damona.readthedocs.io where we provide
+a singularity recipes to build an image from your own  rpm.
 
 
-**bcl2fastq** should be present in your path. Most facilities have the tools
-installed. On cluster, modules provide the tool as well. If you do not have it,
-we provide a singularity image, which can be download as follow::
-
-    singularity pull bcl2fastq.img shub://cokelaer/ngstools:bcl2fastq
-
-Then, just add a script called **bc2fastq** in your binary PATH with is
-content::
-
-    singularity run PATH_TO_image/bcl2fastq.img ${1+"$@"}
 
 Details
 ~~~~~~~~~
