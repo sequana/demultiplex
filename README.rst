@@ -96,6 +96,10 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+1.0.3     * remove check_samplesheet and fix_samplesheet modules now in sequana
+          * check sample sheet but do not fail. Instead, informing users that
+            there is an error and suggest to use 'sequana samplesheet 
+            --quick-fix'
 1.0.2     Use 'sequana samplesheet --check ' command instead of deprecated
           sequana_check_sample_sheet command
 1.0.1     change some default behaviour:

@@ -124,8 +124,15 @@ def main(args=None):
     manager.exists(options.samplesheet)
     manager.exists(options.bcl_directory)
 
-    from sequana_pipelines.demultiplex import check_samplesheet
-    status = check_samplesheet.check_samplesheet(options.samplesheet)
+    # Check the sample sheet
+    from sequana import iem
+    try:
+        samplesheet = iem.IEM(options.samplesheet)
+        samplesheet.validate()
+    except Exception as err:
+        logger.critical(err)
+        logger.critical("""You sample sheet seems to be incorrect. Before running the pipeline 
+you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
 
     # NextSeq
     runparam_1 = options.bcl_directory + os.sep + "RunParameters.xml"
