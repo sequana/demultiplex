@@ -61,7 +61,7 @@ rule check_samplesheet:
     output: temp("ss.log")
     shell:
         """
-        sequana_check_samplesheet -s {input[0]} 2> {output[0]}
+        sequana samplesheet --check {input[0]} 2> {output[0]}
         """
 
 

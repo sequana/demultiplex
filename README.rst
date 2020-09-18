@@ -26,7 +26,7 @@ Usage
 ::
 
     sequana_pipelines_demultiplex --help
-    sequana_pipelines_demultiplex --working-directory DATAPATH --bcl-directory bcldata --samplesheet SampleSheet.csv
+    sequana_pipelines_demultiplex --working-directory DATAPATH --bcl-directory bcldata --sample-sheet SampleSheet.csv
 
 This creates a directory **fastq**. You just need to execute the pipeline::
 
@@ -42,7 +42,7 @@ Or use `sequanix <https://sequana.readthedocs.io/en/master/sequanix.html>`_ inte
 Would you need to merge the lane, please add the --merging-strategy argument
 followed by *merge*::
 
-    sequana_pipelines_demultiplex --bcl-directory bcl_data --merging-strategy merge
+    sequana_pipelines_demultiplex --bcl-directory bcl_data --merging-strategy merge --sample-sheet SampleSheet.csv
 
 
 Requirements
@@ -96,6 +96,8 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+1.0.2     Use 'sequana samplesheet --check ' command instead of deprecated
+          sequana_check_sample_sheet command
 1.0.1     change some default behaviour:
 
           * write_fastq_reverse_complement is now set to False by default
