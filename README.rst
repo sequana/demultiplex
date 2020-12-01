@@ -1,8 +1,17 @@
+
+.. image:: https://badge.fury.io/py/sequana-demultiplex.svg
+     :target: https://pypi.python.org/pypi/demultiplex_fastqc
+
+.. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
+    :target: http://joss.theoj.org/papers/10.21105/joss.00352
+    :alt: JOSS (journal of open source software) DOI
+
+
 This is is the **demultiplex** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ projet
 
 :Overview: Runs bcl2fastq on raw BCL data and creates plots to ease the QC validation
 :Input: A valid Illumina base calling directory
-:Output: a set of PNG files and the expected FastQ files
+:Output: An HTML report, a set of PNG files and the expected FastQ files
 :Status: production
 :Wiki: https://github.com/sequana/sequana_demultiplex/wiki
 :Documentation: This README file, the Wiki from the github repository (link above) and https://sequana.readthedocs.io
