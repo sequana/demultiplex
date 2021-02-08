@@ -35,7 +35,12 @@ Usage
 ::
 
     sequana_pipelines_demultiplex --help
-    sequana_pipelines_demultiplex --working-directory DATAPATH --bcl-directory bcldata --sample-sheet SampleSheet.csv
+    sequana_pipelines_demultiplex --working-directory DATAPATH --bcl-directory bcldata --sample-sheet SampleSheet.csv --merging-strategy merge
+
+The bcl-directory option indicate where to find your raw data, the sample-sheet
+expects the SampleSheet compatible with IEM software. The merging--strategy can
+be set to *none* or *merge*. The *merge* option merge the lanes. For NextSeq
+sequencers.
 
 This creates a directory **fastq**. You just need to execute the pipeline::
 
