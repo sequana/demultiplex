@@ -3,33 +3,14 @@
 
 type: map
 mapping:
-    "input_directory":
-        type: str
-        required: False
-    "input_readtag":
-        type: str
-        required: False
-    "input_pattern":
-        type: str
-        required: False
-    "fastqc":
-        type: map
-        mapping:
-            "do_group":
-                type: bool
-            "options":
-                type: str
-                required: False
+  "general":
+      type: map
+      mapping:
+          "input_directory":
+             type: str
+             required: False
 
-    "multiqc":
-        type: map
-        mapping:
-            "options": 
-                type: str
-            "indir": 
-                type: str
-
-    "bcl2fastq":
+  "bcl2fastq":
         type: map
         mapping:
             "threads":

@@ -55,7 +55,7 @@ class Options(argparse.ArgumentParser):
             type=int, help="Number of threads to use during the demultiplexing. ")
         pipeline_group.add_argument("--barcode-mismatch", dest="mismatch", default=0, type=int)
         pipeline_group.add_argument("--merging-strategy", required=True,
-            dest="merging_strategy", choices=["merge", "none", "none_force"], 
+            dest="merging_strategy", choices=["merge", "none", "none_and_force"], 
             help="""Merge Lanes of not. options are : merge, none, none_and_force.
             The 'merge' choice merges all lanes. The 'none' choice do NOT merge the lanes. 
             For NextSeq runs, we should merge the lanes; if users demultiplex NextSeq 
@@ -118,7 +118,7 @@ def main(args=None):
     # create the beginning of the command and the working directory
     manager.setup()
     from sequana import logger
-    logger.level = options.level
+    logger.setLevel(options.level)
     # fill the config file with input parameters. First, let us check some input
     # files
     manager.exists(options.samplesheet)
@@ -131,7 +131,7 @@ def main(args=None):
         samplesheet.validate()
     except Exception as err:
         logger.critical(err)
-        logger.critical("""You sample sheet seems to be incorrect. Before running the pipeline 
+        logger.critical("""Your sample sheet seems to be incorrect. Before running the pipeline
 you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
 
     # NextSeq
@@ -154,7 +154,7 @@ you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
         with open(runparam, "r") as fin:
             data = fin.read()
             if "NextSeq" in data and options.merging_strategy != "merge":
-                if options.merging_strategy == "none_and_force":
+                if otions.merging_strategy == "none_and_force":
                     msg = "This is a NextSeq. You set the --merging-strategy to"
                     msg += " none_and_force. So, we proceed with no merging strategy"
                     logger.warning(msg)
@@ -166,10 +166,15 @@ you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
 
     if options.from_project is None:
         cfg = manager.config.config
-        cfg.input_directory = os.path.abspath(options.bcl_directory)
+        cfg.general.input_directory = os.path.abspath(options.bcl_directory)
         cfg.bcl2fastq.threads = options.threads
         cfg.bcl2fastq.barcode_mismatch = options.mismatch
         cfg.bcl2fastq.samplesheet_file = os.path.abspath(options.samplesheet)
+
+        from sequana.iem import IEM
+        ss = IEM(cfg.bcl2fastq.samplesheet_file)
+        ss.validate()
+
 
         # this is defined by the working_directory
         cfg.bcl2fastq.output_directory = "."
