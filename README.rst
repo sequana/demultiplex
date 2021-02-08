@@ -13,7 +13,7 @@ This is is the **demultiplex** pipeline from the `Sequana <https://sequana.readt
 :Input: A valid Illumina base calling directory
 :Output: An HTML report, a set of PNG files and the expected FastQ files
 :Status: production
-:Wiki: https://github.com/sequana/sequana_demultiplex/wiki
+:Wiki: https://github.com/sequana/demultiplex/wiki
 :Documentation: This README file, the Wiki from the github repository (link above) and https://sequana.readthedocs.io
 :Citation: Cokelaer et al, (2017), 'Sequana': a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI https://doi:10.21105/joss.00352
 
@@ -85,7 +85,7 @@ a singularity recipes to build an image from your own  rpm. Recipes can be found
 
 Details
 ~~~~~~~~~
-.. image:: https://raw.githubusercontent.com/sequana/sequana_demultiplex/master/sequana_pipelines/demultiplex/dag.png
+.. image:: https://raw.githubusercontent.com/sequana/demultiplex/master/sequana_pipelines/demultiplex/dag.png
 
 This pipeline runs bcl2fastq 2.20 and creates a set of diagnostics plots to help
 deciphering common issues such as missing index and sample sheet errors. 
@@ -94,7 +94,7 @@ deciphering common issues such as missing index and sample sheet errors.
 Rules and configuration details
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/sequana_demultiplex/master/sequana_pipelines/demultiplex/config.yaml>`_
+Here is the `latest documented configuration file <https://raw.githubusercontent.com/sequana/demultiplex/master/sequana_pipelines/demultiplex/config.yaml>`_
 to be used with the pipeline. Each rule used in the pipeline may have a section in the configuration file. 
 
 
@@ -102,9 +102,17 @@ to be used with the pipeline. Each rule used in the pipeline may have a section 
 Changelog
 ~~~~~~~~~
 
-========= ====================================================================
+========= =======================================================================
 Version   Description
-========= ====================================================================
+========= =======================================================================
+1.0.4     * Better HTML report with updated images. 
+          * validate the SampleSheet when using sequana_demultiplex and/or the 
+            pipeline
+          * Add error handler from sequana_pipetools
+          * save all undetermined barcodes (not just first 20)
+          * No changes to the UI
+          * technically, the input_directory option is now in a section so that
+            it can be used in Sequanix
 1.0.3     * remove check_samplesheet and fix_samplesheet modules now in sequana
           * check sample sheet but do not fail. Instead, informing users that
             there is an error and suggest to use 'sequana samplesheet 
@@ -156,7 +164,7 @@ Version   Description
           want to merge the lanes or not. This avoid to do the merging or not 
           whereas the inverse was expected.
 0.8.6     Uses 64G/biomics queue and 16 cores on a SLURM scheduler
-========= ====================================================================
+========= =======================================================================
 
 
 
