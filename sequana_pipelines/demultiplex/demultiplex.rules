@@ -29,7 +29,8 @@ import os
 import json
 import sys
 
-from sequana import logger
+# do not overwrite the snakemake logger !
+from sequana import logger as log
 # This must be defined before the include
 configfile: "config.yaml"
 
@@ -39,7 +40,6 @@ manager.setup(globals(), mode="error")
 
 # an alias
 cfg = config['bcl2fastq']
-outdir = os.path.abspath(cfg["output_directory"])
 
 if cfg["samplesheet_file"].strip() != "":
     if os.path.exists(cfg['samplesheet_file']) is False:
@@ -47,13 +47,13 @@ if cfg["samplesheet_file"].strip() != "":
 
 
 # Check the sample sheet
-from sequana import iem
 try:
+    from sequana import iem
     samplesheet = iem.IEM(cfg['samplesheet_file'])
     samplesheet.validate()
 except Exception as err:
-    logger.error(err)
-    logger.error("""Your sample sheet seems to be incorrect. Before running the pipeline
+    log.error(err)
+    log.error("""Your sample sheet seems to be incorrect. Before running the pipeline
 you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
     sys.exit(1)
 
@@ -62,20 +62,20 @@ you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
 
 rule pipeline:
     input:
-        outdir + "/Stats/summary.txt",
-        outdir + "/undetermined_barcodes.csv",
-        outdir + "/barcodes.png",
-        outdir + "/samples.png",
-        outdir + "/summary.png",
+        "Stats/summary.txt",
+        "undetermined_barcodes.csv",
+        "barcodes.png",
+        "samples.png",
+        "summary.png",
         ".sequana/rulegraph.svg",
 
 
 rule plot_unknown_barcodes:
-    input: outdir + "/Stats/Stats.json"
+    input: "Stats/Stats.json"
     output:
-        csv=outdir + "/undetermined_barcodes.csv",
-        csv20=outdir + "/undetermined_barcodes_20.csv",
-        png=outdir + "/barcodes.png"
+        csv= "undetermined_barcodes.csv",
+        csv20= "undetermined_barcodes_20.csv",
+        png= "barcodes.png"
     run:
         from sequana.demultiplex import StatsFile
         s = StatsFile(input[0])
@@ -106,10 +106,9 @@ rule check_samplesheet:
 rule bcl2fastq:
     input: "ss.log"
     output:
-        outdir + "/Stats/Stats.json",
+        "Stats/Stats.json",
     params:
         indir= config["general"]["input_directory"],
-        outdir= outdir,
         samplesheet=cfg['samplesheet_file'],
         barcode_mismatch=cfg['barcode_mismatch']
     threads: cfg['threads']
@@ -121,7 +120,7 @@ rule bcl2fastq:
         cmd += " --intensities-dir {}/Data/Intensities".format(params.indir)
         if params.samplesheet.strip()!= "":
             cmd += " --sample-sheet {}".format(params.samplesheet)
-        cmd += " --output-dir {}".format(os.path.abspath(params.outdir))
+        cmd += " --output-dir {}".format(os.path.abspath("."))
 
         # deprecated according to bcl2fastq documentation 2.20
         #if cfg['ignore_missing_controls']:
@@ -142,9 +141,9 @@ rule bcl2fastq:
         shell(cmd)
 
 rule plot_barplot_samples:
-    input: outdir + "/Stats/Stats.json"
+    input:  "Stats/Stats.json"
     output:
-        barplot=outdir + "/samples.png"
+        barplot="samples.png"
     run:
         from sequana.demultiplex import StatsFile
         s = StatsFile(input[0])
@@ -152,10 +151,10 @@ rule plot_barplot_samples:
 
 
 rule plot_summary:
-    input: outdir + "/Stats/Stats.json"
+    input: "Stats/Stats.json"
     output:
-        summary=outdir + "/Stats/summary.txt",
-        barplot=outdir + "/summary.png"
+        summary= "Stats/summary.txt",
+        barplot= "summary.png"
     run:
         from sequana.demultiplex import StatsFile
         s = StatsFile(input[0])

@@ -110,6 +110,8 @@ Changelog
 ========= =======================================================================
 Version   Description
 ========= =======================================================================
+1.0.5     * Fix regression bug to cope with new snakemake API
+          * Compatibility with sequanix GUI
 1.0.4     * Better HTML report with updated images. 
           * validate the SampleSheet when using sequana_demultiplex and/or the 
             pipeline

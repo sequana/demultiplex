@@ -19,8 +19,6 @@ mapping:
                 type: int
             "samplesheet_file":
                 type: str
-            "output_directory":
-                type: str
             "ignore_missing_controls":
                 type: bool
             "ignore_missing_bcls":

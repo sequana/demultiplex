@@ -177,7 +177,7 @@ you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
 
 
         # this is defined by the working_directory
-        cfg.bcl2fastq.output_directory = "."
+        #cfg.bcl2fastq.output_directory = "."
         cfg.bcl2fastq.ignore_missing_bcls = not options.no_ignore_missing_bcls
         cfg.bcl2fastq.no_bgzf_compression = not options.bgzf_compression
         if options.merging_strategy == "merge":

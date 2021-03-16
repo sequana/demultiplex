@@ -41,7 +41,6 @@ bcl2fastq:
     threads: 4
     barcode_mismatch: 0
     samplesheet_file: 
-    output_directory: .
     ignore_missing_bcls: true
     no_bgzf_compression: true
     options: ''
