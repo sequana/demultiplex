@@ -22,6 +22,7 @@ import subprocess
 from sequana_pipetools.options import *
 from sequana_pipetools.misc import Colors
 from sequana_pipetools.info import sequana_epilog, sequana_prolog
+from sequana_pipetools import SequanaManager
 
 col = Colors()
 
@@ -78,10 +79,6 @@ this flag(--no-ignore-missing-bcls)""")
             help="""turn on BGZF compression for FASTQ files. By default,
 bcl2fastq uses this option; By default we don't. Set --bgzl--compression flag to
 set it back""")
-        pipeline_group.add_argument("--write-fastq-reverse-complement",
-            dest="write_fastq_reverse_complement", action="store_true",
-            default=False,
-            help="generate FASTQs containing reverse complements of actual data")
         self.add_argument("--run", default=False, action="store_true",
             help="execute the pipeline directly")
 
@@ -110,7 +107,6 @@ def main(args=None):
     # option parsing including common epilog
     options = Options(NAME, epilog=sequana_epilog).parse_args(args[1:])
 
-    from sequana.pipelines_common import SequanaManager
 
     # the real stuff is here
     manager = SequanaManager(options, NAME)
@@ -184,7 +180,6 @@ you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
             cfg.bcl2fastq.merge_all_lanes = True
         elif options.merging_strategy in  ["none", "none_and_force"]:
             cfg.bcl2fastq.merge_all_lanes = False
-        cfg.bcl2fastq.write_fastq_reverse_complement = options.write_fastq_reverse_complement
 
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.

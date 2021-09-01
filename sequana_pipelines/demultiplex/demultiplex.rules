@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #  This file is part of Sequana software
 #
@@ -24,40 +23,42 @@ You will need bcl2fastq/2.20.0 Please see REAME and wiki on https://github.com/s
 
 http://emea.support.illumina.com/downloads/bcl2fastq-conversion-software-v2-20.html?langsel=/fr/
 """
-from sequana import snaketools as sm
+from sequana_pipetools import snaketools as sm
+from sequana_pipetools import PipelineManagerDirectory
 import os
 import json
 import sys
 
 # do not overwrite the snakemake logger !
 from sequana import logger as log
+
 # This must be defined before the include
 configfile: "config.yaml"
 
 # A convenient manager
-manager = sm.PipelineManagerDirectory("demultiplex", config)
+manager = PipelineManagerDirectory("demultiplex", config)
 manager.setup(globals(), mode="error")
 
-# an alias
-cfg = config['bcl2fastq']
 
-if cfg["samplesheet_file"].strip() != "":
-    if os.path.exists(cfg['samplesheet_file']) is False:
-        raise IOError("Sample sheet {} does not exist".format(cfg['samplesheet_file']))
+samplesheet = config['bcl2fastq']['samplesheet_file'].strip()
+
+
+if samplesheet.strip() != "":
+    if os.path.exists(samplesheet) is False:
+        log.error(f"Sample sheet {samplesheet} does not exist")
+        sys.exit(1)
 
 
 # Check the sample sheet
 try:
     from sequana import iem
-    samplesheet = iem.IEM(cfg['samplesheet_file'])
+    samplesheet = iem.IEM(samplesheet)
     samplesheet.validate()
 except Exception as err:
     log.error(err)
     log.error("""Your sample sheet seems to be incorrect. Before running the pipeline
 you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
     sys.exit(1)
-
-
 
 
 rule pipeline:
@@ -93,9 +94,8 @@ rule plot_unknown_barcodes:
         df.to_csv(output.csv)
 
 
-
 rule check_samplesheet:
-    input: cfg['samplesheet_file']
+    input: config['bcl2fastq']['samplesheet_file']
     output: temp("ss.log")
     shell:
         """
@@ -104,41 +104,23 @@ rule check_samplesheet:
 
 
 rule bcl2fastq:
-    input: "ss.log"
+    input:
+        valid_samplesheet="ss.log",
+        samplesheet=config['bcl2fastq']['samplesheet_file']
     output:
         "Stats/Stats.json",
     params:
         indir= config["general"]["input_directory"],
-        samplesheet=cfg['samplesheet_file'],
-        barcode_mismatch=cfg['barcode_mismatch']
-    threads: cfg['threads']
-    run:
+        barcode_mismatch=config['bcl2fastq']['barcode_mismatch'],
+        ignore_missing_bcls=config['bcl2fastq']['ignore_missing_bcls'],
+        no_bgzf_compression=config['bcl2fastq']['no_bgzf_compression'],
+        merge_all_lanes=config['bcl2fastq']['merge_all_lanes'],
+        options=config['bcl2fastq']['options']
+    threads: config['bcl2fastq']['threads']
+    wrapper:
+        "demultiplex/wrappers/bcl2fastq"
 
-        cmd = "bcl2fastq -p {threads} --barcode-mismatches {params.barcode_mismatch}"
-        #cmd += " --input-dir {}/Data/Intensities/BaseCalls".format(params.indir)
-        cmd += " --runfolder-dir {}".format(params.indir)
-        cmd += " --intensities-dir {}/Data/Intensities".format(params.indir)
-        if params.samplesheet.strip()!= "":
-            cmd += " --sample-sheet {}".format(params.samplesheet)
-        cmd += " --output-dir {}".format(os.path.abspath("."))
 
-        # deprecated according to bcl2fastq documentation 2.20
-        #if cfg['ignore_missing_controls']:
-        #    cmd += " --ignore-missing-controls "
-        if cfg['ignore_missing_bcls']:
-            cmd += " --ignore-missing-bcls "
-        if cfg['no_bgzf_compression']:
-            cmd += " --no-bgzf-compression "
-
-        if cfg['merge_all_lanes']:
-            cmd += " --no-lane-splitting "
-
-        if cfg['write_fastq_reverse_complement']:
-            cmd += " --write-fastq-reverse-complement"
-
-        cmd += cfg['options']
-
-        shell(cmd)
 
 rule plot_barplot_samples:
     input:  "Stats/Stats.json"
@@ -162,16 +144,23 @@ rule plot_summary:
         # save summary at the end because barplot output is not set.
         s.to_summary_reads(output.summary)
 
-__rulegraph__input = manager.snakefile
-__rulegraph__output = ".sequana/rulegraph.svg"
-__rulegraph__mapper = {}
-include: sm.modules['rulegraph']
+
+rule rulegraph:
+    input: manager.snakefile
+    output:
+        svg = ".sequana/rulegraph.svg"
+    params:
+        mapper = {},
+        configname = "config.yaml"
+    wrapper:
+        "main/wrappers/rulegraph"
+
 localrules: rulegraph, check_samplesheet
 
 
 onsuccess:
     shell("chmod -R g+w .")
-    manager.teardown()
+    manager.teardown(plot_stats=False)
 
     from sequana.modules_report.summary import SummaryModule2
 
@@ -193,7 +182,8 @@ onsuccess:
 <hr>
 <br>
 
-<p style="text-align:justify">The following image shows the indices found in the most Undetermined barcodes per lane. An index in excess may indicate a wrong SampleSheet with a typo in a given index. The 20 most represented undetermined barcodse are downloaded <a href="undetermined_barcodes_20.csv">here</a>. A full list of all undetermined indices is also downloaded <a href="undetermined_barcodes.csv">here</a> as a CSV file.</p> 
+<p style="text-align:justify">The following image shows the indices found in the most Undetermined barcodes per lane. An index in excess may indicate a wrong SampleSheet with a potential typo error or simply a missing sample/index. 
+The 20 most represented undetermined barcodes are available <a href="undetermined_barcodes_20.csv">here</a>. A full list of all undetermined indices is also downloaded <a href="undetermined_barcodes.csv">here</a> as a CSV file. The vertical dashed red line indicates the median of the number of reads found in the determined samples. If the bars are well below this vertical line, you data is probably well demultiplexed.</p> 
 <br><br>{} <hr> 
 <p style="text-align:justify">
 The following image shows the ratio of determined/undetermined reads after demultiplexing. Again, an excess of undetermined (larger than 10-20%) may indicate a wrongly labelled sample in your sample sheet.
@@ -209,7 +199,7 @@ The following image is similar. Instead of showing the index, we show here the n
     data = {
             "name": manager.name,
             "stats": "stats.txt", 
-            "rulegraph": __rulegraph__output,
+            "rulegraph": ".sequana/rulegraph.svg",
             "pipeline_version": demultiplex.version
             }
     s = SummaryModule2(data, intro=intro)

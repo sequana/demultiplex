@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<RunParameters xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <InstrumentId>FS10000482</InstrumentId>
+  <RunId>20200123_FS10000482_42_BPG80712-1010</RunId>
+  <RunCounter>42</RunCounter>
+  <ApplicationName>iSeq Control Software</ApplicationName>
+  <ApplicationVersion>1.3.0.18</ApplicationVersion>
+  <ClientVersion>1.3.0.1098</ClientVersion>
+  <FirmwareVersion>1.3.0</FirmwareVersion>
+  <Pdb1FirmwareVersion>1.3.0</Pdb1FirmwareVersion>
+  <Pdb2FirmwareVersion>1.3.0</Pdb2FirmwareVersion>
+  <SibFpgaVersion>0x1300000a</SibFpgaVersion>
+  <SibBoardRevision>PilotvA</SibBoardRevision>
+  <Pdb1BoardRevision>4</Pdb1BoardRevision>
+  <Pdb2BoardRevision>3</Pdb2BoardRevision>
+  <IdbBoardRevision>1</IdbBoardRevision>
+  <RtaVersion>2.12.5.0</RtaVersion>
+  <ExperimentName>B3202</ExperimentName>
+  <RecipeRelativeFilePath>Protocol\2Read1Index.xml</RecipeRelativeFilePath>
+  <RecipeFolder>C:\ProgramData\Illumina\iSeq Control Software\Recipe</RecipeFolder>
+  <RecipeName>2Read1Index</RecipeName>
+  <RecipeVersion>P2BL_6.1.4</RecipeVersion>
+  <LibraryPoolId>X</LibraryPoolId>
+  <LocalRunManagerRunId>39039</LocalRunManagerRunId>
+  <LocalRunManagerVersion>2.1.2.1691</LocalRunManagerVersion>
+  <UcsRunId>167E20437127DA76</UcsRunId>
+  <ReadType>PairedEnd</ReadType>
+  <RtaSaveThumbnailImages>true</RtaSaveThumbnailImages>
+  <PlannedCycles>
+    <Read1>151</Read1>
+    <Index1>6</Index1>
+    <Index2>0</Index2>
+    <Read2>151</Read2>
+  </PlannedCycles>
+  <CompletedCycles>
+    <Read1>151</Read1>
+    <Index1>6</Index1>
+    <Index2>0</Index2>
+    <Read2>151</Read2>
+  </CompletedCycles>
+  <SequencingMetrics>
+    <Q30Read1>93.89635</Q30Read1>
+    <Q30Read2>90.07538</Q30Read2>
+    <ProjectedYield>1.273027 G</ProjectedYield>
+  </SequencingMetrics>
+  <RunFolderPath>D:\Illumina\iSeq Runs\20200123_FS10000482_42_BPG80712-1010</RunFolderPath>
+  <OutputFolder>D:\SequencingRuns\20200123_FS10000482_42_BPG80712-1010</OutputFolder>
+  <SampleSheetPath />
+  <FlowcellEEPROMTag>
+    <SerialNumber>BPG80712-1010</SerialNumber>
+    <PartNumber>20009555</PartNumber>
+    <LotNumber>20382760</LotNumber>
+    <ExpirationDate>2020-07-14T00:00:00</ExpirationDate>
+  </FlowcellEEPROMTag>
+  <ReagentKitRFIDTag>
+    <SerialNumber>FY0028619-FC6</SerialNumber>
+    <PartNumber>20025914</PartNumber>
+    <LotNumber>20410537</LotNumber>
+    <ExpirationDate>2020-06-12T00:00:00</ExpirationDate>
+  </ReagentKitRFIDTag>
+  <RunStartDate>2020-01-23T17:37:13+01:00</RunStartDate>
+  <RunEndDate>2020-01-24T11:05:17+01:00</RunEndDate>
+  <BaseSpaceParameters>
+    <EnvironmentName>use1-prod</EnvironmentName>
+    <Mode>None</Mode>
+  </BaseSpaceParameters>
+</RunParameters>

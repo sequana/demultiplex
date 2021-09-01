@@ -1,0 +1,34 @@
+[Header]
+IEMFileVersion,5
+Investigator Name,Saliha
+Experiment Name,Saliha
+Date,7/12/2019
+Workflow,GenerateFASTQ
+Application,NextSeq FASTQ Only
+Instrument Type,NextSeq/MiniSeq
+Assay,TruSeq Stranded mRNA
+Index Adapters,"TruSeq RNA Single Indexes (A & B)"
+Description,B2933
+Chemistry,Default
+
+[Reads]
+75
+
+[Settings]
+Adapter,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
+AdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+
+[Data]
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,Sample_Project,Description
+woHHR1,,,,AR001-B,ATCACG,B2933,
+woHHR2,,,,AR002-A,CGATGT,B2933,
+woHHR3,,,,AR003-B,TTAGGC,B2933,
+4HHHR1,,,,AR004-A,TGACCA,B2933,
+4HHHR2,,,,AR005-A,ACAGTG,B2933,
+4HHHR3,,,,AR006-A,GCCAAT,B2933,
+8HHHR1,,,,AR007-A,CAGATC,B2933,
+8HHHR2,,,,AR008-B,ACTTGA,B2933,
+8HHHR3,,,,AR009-B,GATCAG,B2933,
+16HHHR1,,,,AR010-B,TAGCTT,B2933,
+16HHHR2,,,,AR011-B,GGCTAC,B2933,
+16HHHR3,,,,AR012-A,CTTGTA,B2933,

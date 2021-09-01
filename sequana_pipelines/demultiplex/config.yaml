@@ -33,7 +33,6 @@ general:
 #
 #
 # --ignore_missing_bcls: interpret missing *.bcl files as no call (N)
-# --write-fastq-reverse-complement:  generate FASTQs containing reverse complements of actual data
 # --no-bgzf-compression: turn off BGZF compression for FASTQ files
 # --barcode-mismatches:  number of allowed mismatches per index
 # merge_all_lanes: if false, use the --no-lane-splitting option
@@ -45,6 +44,5 @@ bcl2fastq:
     no_bgzf_compression: true
     options: ''
     merge_all_lanes: true
-    write_fastq_reverse_complement: false
 
 
