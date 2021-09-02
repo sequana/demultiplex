@@ -39,21 +39,23 @@ Usage
     sequana_pipelines_demultiplex --help
     sequana_pipelines_demultiplex --working-directory DATAPATH --bcl-directory bcldata --sample-sheet SampleSheet.csv --merging-strategy merge
 
-The bcl-directory option indicate where to find your raw data, the sample-sheet
-expects the SampleSheet compatible with IEM software. The merging--strategy can
-be set to *none* or *merge*. The *merge* option merge the lanes. For NextSeq
-sequencers.
+The --bcl-directory option indicates where to find your raw data, the sample-sheet
+expects the SampleSheet to be compatible with IEM software. The --merging-strategy can
+be set to *none* or *merge*. The *merge* option merges the lanes, which is
+useful for e.g. NextSeq sequencers.
 
 This creates a directory **fastq**. You just need to execute the pipeline::
 
     cd demultiplex
     sh demultiplex.sh  # for a local run
 
-This launch a snakemake pipeline. If you are familiar with snakemake, you can retrieve the demultiplex.rules and config.yaml files and then execute the pipeline yourself with specific parameters::
+These commands launch a snakemake pipeline. If you are familiar with snakemake, you can retrieve the demultiplex.rules and config.yaml files and then execute the pipeline yourself with specific parameters::
 
-    snakemake -s demultiplex.rules --cores 4 --stats stats.txt
+    snakemake -s demultiplex.rules --cores 4 --stats stats.txt \
+        --wrapper-prefix https://raw.githubusercontent.com/sequana/sequana-wrappers/"
 
-Or use `sequanix <https://sequana.readthedocs.io/en/master/sequanix.html>`_ interface.
+
+You may also use `sequanix <https://sequana.readthedocs.io/en/master/sequanix.html>`_ for a graphical interface.
 
 Would you need to merge the lane, please add the --merging-strategy argument
 followed by *merge*::
@@ -64,7 +66,7 @@ followed by *merge*::
 Requirements
 ~~~~~~~~~~~~
 
-This pipelines requires the following third-party tool(s):
+This pipeline requires the following third-party tool(s):
 
 - bcl2fastq 2.20.0
 
@@ -89,7 +91,6 @@ a singularity recipes to build an image from your own  rpm. Recipes can be found
 `here <https://github.com/cokelaer/damona/tree/master/damona/recipes/bcl2fastq>`_.
 
 
-
 Details
 ~~~~~~~~~
 .. image:: https://raw.githubusercontent.com/sequana/demultiplex/master/sequana_pipelines/demultiplex/dag.png
@@ -112,6 +113,7 @@ Changelog
 ========= =======================================================================
 Version   Description
 ========= =======================================================================
+1.1.0     * Uses new sequana-wrappers repository
 1.0.5     * Fix regression bug to cope with new snakemake API
           * Compatibility with sequanix GUI
 1.0.4     * Better HTML report with updated images. 

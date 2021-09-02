@@ -4,7 +4,7 @@ import easydev
 from . import test_dir
 
 
-sharedir = f{"test_dir}/data/"
+sharedir = f"{test_dir}/data/"
 
 
 def test_noerror():
