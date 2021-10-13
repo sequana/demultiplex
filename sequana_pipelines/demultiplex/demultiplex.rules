@@ -158,7 +158,7 @@ localrules: rulegraph, check_samplesheet
 
 onsuccess:
     shell("chmod -R g+w .")
-    manager.teardown(plot_stats=False)
+    manager.teardown()
 
     from sequana.modules_report.summary import SummaryModule2
 
