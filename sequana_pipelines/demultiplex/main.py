@@ -150,7 +150,7 @@ you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
         with open(runparam, "r") as fin:
             data = fin.read()
             if "NextSeq" in data and options.merging_strategy != "merge":
-                if otions.merging_strategy == "none_and_force":
+                if options.merging_strategy == "none_and_force":
                     msg = "This is a NextSeq. You set the --merging-strategy to"
                     msg += " none_and_force. So, we proceed with no merging strategy"
                     logger.warning(msg)
