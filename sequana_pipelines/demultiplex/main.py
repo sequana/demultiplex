@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 #
 #  This file is part of Sequana software
 #
-#  Copyright (c) 2016 - Sequana Development Team
+#  Copyright (c) 2016-2021 - Sequana Development Team
 #
 #  File author(s):
 #      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
@@ -56,11 +55,11 @@ class Options(argparse.ArgumentParser):
             type=int, help="Number of threads to use during the demultiplexing. ")
         pipeline_group.add_argument("--barcode-mismatch", dest="mismatch", default=0, type=int)
         pipeline_group.add_argument("--merging-strategy", required=True,
-            dest="merging_strategy", choices=["merge", "none", "none_and_force"], 
-            help="""Merge Lanes of not. options are : merge, none, none_and_force.
-            The 'merge' choice merges all lanes. The 'none' choice do NOT merge the lanes. 
-            For NextSeq runs, we should merge the lanes; if users demultiplex NextSeq 
-            and set this option to none, an error is raised. If you still want to 
+            dest="merging_strategy", choices=["merge", "none", "none_and_force"],
+            help="""Merge Lanes or not. options are : merge, none, none_and_force.
+            The 'merge' choice merges all lanes. The 'none' choice do NOT merge the lanes.
+            For NextSeq runs, we should merge the lanes; if users demultiplex NextSeq
+            and set this option to none, an error is raised. If you still want to
             skip the merging step, then set this option to 'none_and_force'""")
         pipeline_group.add_argument("--bcl-directory", dest="bcl_directory",
             required=True, help="""Directory towards the raw BCL files. This directory should
@@ -79,6 +78,9 @@ this flag(--no-ignore-missing-bcls)""")
             help="""turn on BGZF compression for FASTQ files. By default,
 bcl2fastq uses this option; By default we don't. Set --bgzl--compression flag to
 set it back""")
+        self.add_argument("--mars-seq", default=False, action="store_true",
+            help="""Set options to  --minimum-trimmed-read-length 15 --mask-short-adapter-reads 15 
+and do not merge lanes""")
         self.add_argument("--run", default=False, action="store_true",
             help="execute the pipeline directly")
 
@@ -115,10 +117,15 @@ def main(args=None):
     manager.setup()
     from sequana import logger
     logger.setLevel(options.level)
-    # fill the config file with input parameters. First, let us check some input
-    # files
-    manager.exists(options.samplesheet)
-    manager.exists(options.bcl_directory)
+
+    # ============================================== sanity checks
+    if not os.path.exists(options.samplesheet):
+        logger.error(f"{options.samplesheet} file does not exists")
+        sys.exit(1)
+
+    if not os.path.exists(options.bcl_directory):
+        logger.error(f"{options.bcl_directory} file does not exists")
+        sys.exit(1)
 
     # Check the sample sheet
     from sequana import iem
@@ -143,8 +150,6 @@ you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
     else:
         runparam = None
         logger.warning("RunParameters.xml or runParameters.xml file not found")
-
-    manager.exists(runparam, warning_only=True)
 
     if runparam:
         with open(runparam, "r") as fin:
@@ -176,15 +181,22 @@ you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
         #cfg.bcl2fastq.output_directory = "."
         cfg.bcl2fastq.ignore_missing_bcls = not options.no_ignore_missing_bcls
         cfg.bcl2fastq.no_bgzf_compression = not options.bgzf_compression
+
         if options.merging_strategy == "merge":
             cfg.bcl2fastq.merge_all_lanes = True
         elif options.merging_strategy in  ["none", "none_and_force"]:
             cfg.bcl2fastq.merge_all_lanes = False
 
+        #
+        if options.mars_seq:
+            cfg.bcl2fastq.options = " --minimum-trimmed-read-length 15 --mask-short-adapter-reads 15 "
+            if options.merging_strategy in ["merge"]:
+                logger.warning("with --mars-seq option, the merging strategy should be none_and_force")
+                cfg.bcl2fastq.merge_all_lanes = False
+
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.
     manager.teardown(check_input_files=False)
- 
 
     if options.run:
         subprocess.Popen(["sh", '{}.sh'.format(NAME)], cwd=options.workdir)

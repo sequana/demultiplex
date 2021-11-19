@@ -113,6 +113,7 @@ Changelog
 ========= =======================================================================
 Version   Description
 ========= =======================================================================
+1.1.2     * add the --mars-seq option that fills the config automatically
 1.1.1     * fix a regression bug
 1.1.0     * Uses new sequana-wrappers repository
 1.0.5     * Fix regression bug to cope with new snakemake API
