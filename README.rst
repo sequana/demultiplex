@@ -32,8 +32,8 @@ Usage
 
 ::
 
-    sequana_pipelines_demultiplex --help
-    sequana_pipelines_demultiplex --working-directory DATAPATH --bcl-directory bcldata --sample-sheet SampleSheet.csv --merging-strategy merge
+    sequana_demultiplex --help
+    sequana_demultiplex --working-directory DATAPATH --bcl-directory bcldata --sample-sheet SampleSheet.csv --merging-strategy merge
 
 The --bcl-directory option indicates where to find your raw data, the sample-sheet
 expects the SampleSheet to be compatible with IEM software. The --merging-strategy can
@@ -56,7 +56,7 @@ You may also use `sequanix <https://sequana.readthedocs.io/en/master/sequanix.ht
 Would you need to merge the lane, please add the --merging-strategy argument
 followed by *merge*::
 
-    sequana_pipelines_demultiplex --bcl-directory bcl_data --merging-strategy merge --sample-sheet SampleSheet.csv
+    sequana_demultiplex --bcl-directory bcl_data --merging-strategy merge --sample-sheet SampleSheet.csv
 
 
 Requirements
