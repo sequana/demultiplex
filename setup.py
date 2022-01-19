@@ -6,8 +6,8 @@ from setuptools.command.install import install
 import subprocess
 
 _MAJOR               = 1
-_MINOR               = 1
-_MICRO               = 3
+_MINOR               = 2
+_MICRO               = 0
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -55,8 +55,7 @@ setup(
     classifiers      = metainfo['classifiers'],
 
     # package installation
-    packages = ["sequana_pipelines.demultiplex",
-        'sequana_pipelines.demultiplex.data' ],
+    packages = ["sequana_pipelines.demultiplex"],
 
     install_requires = open("requirements.txt").read(),
 
@@ -64,13 +63,11 @@ setup(
     exclude_package_data = {"": ["__pycache__"]},
     package_data = {
         '': ['*.yaml', "*.rules", "*.json", "requirements.txt", "*png"],
-        'sequana.pipelines.demultiplex.data' : ['*.*'], 
         },
 
     zip_safe=False,
 
     entry_points = {'console_scripts':[
-        'sequana_pipelines_demultiplex=sequana_pipelines.demultiplex.main:main',
         'sequana_demultiplex=sequana_pipelines.demultiplex.main:main',
         'sequana_fix_samplesheet=sequana_pipelines.demultiplex.fix_samplesheet:main',
         'sequana_check_samplesheet=sequana_pipelines.demultiplex.check_samplesheet:main']

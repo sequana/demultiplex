@@ -39,7 +39,7 @@ class Options(argparse.ArgumentParser):
         # add a new group of options to the parser
         # demultiplex requires lots of memory sometimes hence the 64G options
         #
-        so = SlurmOptions(queue="biomics", memory="64000", cores=16)
+        so = SlurmOptions(queue="biomicspole", memory="64000", cores=16)
         so.add_options(self)
 
         # add a snakemake group of options to the parser
