@@ -7,7 +7,8 @@
     :alt: JOSS (journal of open source software) DOI
 
 .. image:: https://github.com/sequana/demultiplex/actions/workflows/main.yml/badge.svg
-   :target: https://github.com/sequana/demultiplex/actions/workflows    
+   :target: https://github.com/sequana/demultiplex/actions/workflows/main.yml
+
 
 This is is the **demultiplex** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ projet
 
