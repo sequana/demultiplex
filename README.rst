@@ -23,11 +23,7 @@ This is is the **demultiplex** pipeline from the `Sequana <https://sequana.readt
 Installation
 ~~~~~~~~~~~~
 
-You must install Sequana first::
-
-    pip install sequana
-
-Then, just install this package::
+Intall the **sequana_demultiplex** package as follows::
 
     pip install sequana_demultiplex
 
