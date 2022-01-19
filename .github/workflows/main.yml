@@ -48,11 +48,11 @@ jobs:
       run: |
         pip install damona
         damona env --create TEST
-
+      env:
+        DAMONA_EXE: /usr/share/miniconda/bin/damona
+        DAMONA_PATH: /home/runner/.config/damona
     - name: install Damona singularity
       run: |
-        which damona
-        ls /usr/share/miniconda/lib/python3.9/site-packages/damona/shell/
         damona activate TEST
         damona install bcl2fastq
       env:
