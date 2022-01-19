@@ -43,21 +43,24 @@ jobs:
     - name: Install dependencies
       run: |
         pip install coveralls pytest-cov pytest pytest-xdist
-
-    - name: Damona
-      run: |
         pip install damona
-        damona env --create TEST
 
-    - name: install Damona singularity
+    - name: Activate Damona
       run: |
-        which damona
-        ls /usr/share/miniconda/lib/python3.9/site-packages/damona/shell/
+        bash
+        damona  # this creates the bash script
+        echo " source ~/.config/damona/damona.sh" >> ~/.bashrc
+    - name: Create env, install bcl2fastq
+      run: |
+        bash
+        damona env --create TEST
         damona activate TEST
         damona install bcl2fastq
       env:
         DAMONA_EXE: /usr/share/miniconda/bin/damona
         DAMONA_PATH: /home/runner/.config/damona
+        DAMONA_SINGULARITY_OPTIONS: ""
+        DAMONA_ENV: /home/runner/.config/damona/envs/TEST
 
     - name: install package itself
       run: |
@@ -65,10 +68,13 @@ jobs:
 
     - name: testing
       run: |
+        damona activate TEST
         pytest --cov-report term --cov=sequana_pipelines.demultiplex
       env:
         DAMONA_EXE: /usr/share/miniconda/bin/damona
         DAMONA_PATH: /home/runner/.config/damona
+        DAMONA_SINGULARITY_OPTIONS: ""
+        DAMONA_ENV: /home/runner/.config/damona/envs/TEST
 
     - name: coveralls
       run: |
