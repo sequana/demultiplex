@@ -47,18 +47,20 @@ jobs:
     - name: Damona
       run: |
         pip install damona
-        damona env --create TEST
+        damona  # this creates the bash script
       env:
         DAMONA_EXE: /usr/share/miniconda/bin/damona
         DAMONA_PATH: /home/runner/.config/damona
+        DAMONA_SINGULARITY_OPTIONS: ""
     - name: install Damona singularity
       run: |
+        damona env --create TEST
         damona activate TEST
         damona install bcl2fastq
       env:
         DAMONA_EXE: /usr/share/miniconda/bin/damona
         DAMONA_PATH: /home/runner/.config/damona
-
+        DAMONA_SINGULARITY_OPTIONS: ""
     - name: install package itself
       run: |
          pip install .
@@ -69,6 +71,7 @@ jobs:
       env:
         DAMONA_EXE: /usr/share/miniconda/bin/damona
         DAMONA_PATH: /home/runner/.config/damona
+        DAMONA_SINGULARITY_OPTIONS: ""
 
     - name: coveralls
       run: |
