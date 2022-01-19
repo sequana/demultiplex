@@ -44,7 +44,7 @@ jobs:
       run: |
         pip install coveralls pytest-cov pytest pytest-xdist
         pip install damona
-
+        
     - name: Activate Damona
       run: |
         bash
@@ -61,7 +61,6 @@ jobs:
         DAMONA_PATH: /home/runner/.config/damona
         DAMONA_SINGULARITY_OPTIONS: ""
         DAMONA_ENV: /home/runner/.config/damona/envs/TEST
-
     - name: install package itself
       run: |
          pip install .
