@@ -67,8 +67,7 @@ setup(
 
     entry_points = {'console_scripts':[
         'sequana_demultiplex=sequana_pipelines.demultiplex.main:main',
-        'sequana_fix_samplesheet=sequana_pipelines.demultiplex.fix_samplesheet:main',
-        'sequana_check_samplesheet=sequana_pipelines.demultiplex.check_samplesheet:main']
+        ]
     }
 
 )
