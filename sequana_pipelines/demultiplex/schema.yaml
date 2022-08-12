@@ -31,4 +31,8 @@ mapping:
                 type: bool
             "write_fastq_reverse_complement":
                 type: bool
+            "resources":
+                type: any
+                required: true
+
 

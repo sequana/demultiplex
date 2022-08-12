@@ -110,6 +110,7 @@ Changelog
 ========= =======================================================================
 Version   Description
 ========= =======================================================================
+1.2.1     * Update CI action and use new sequana_pipetools v0.9.0
 1.2.0     * stable release with cleanup of the setup and README
 1.1.3     * add the --mars-seq option that fills the config automatically
 1.1.2     * fix the none_and_force merging strategy option
