@@ -44,5 +44,6 @@ bcl2fastq:
     no_bgzf_compression: true
     options: ''
     merge_all_lanes: true
-
+    resources:
+        mem: 64G
 

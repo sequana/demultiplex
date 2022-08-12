@@ -35,7 +35,6 @@ configfile: "config.yaml"
 
 # A convenient manager
 manager = PipelineManagerDirectory("demultiplex", config)
-manager.setup(globals(), mode="error")
 
 
 samplesheet = config['bcl2fastq']['samplesheet_file'].strip()
@@ -115,6 +114,8 @@ rule bcl2fastq:
         merge_all_lanes=config['bcl2fastq']['merge_all_lanes'],
         options=config['bcl2fastq']['options']
     threads: config['bcl2fastq']['threads']
+    resources:
+       **config['bcl2fastq']['resources']
     wrapper:
         "main/wrappers/bcl2fastq"
 

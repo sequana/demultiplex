@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-# License: 3-clause BSD
 from setuptools import setup, find_namespace_packages
 from setuptools.command.develop import develop
 from setuptools.command.install import install
@@ -7,7 +5,7 @@ import subprocess
 
 _MAJOR               = 1
 _MINOR               = 2
-_MICRO               = 0
+_MICRO               = 1
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -62,7 +60,7 @@ setup(
     # This is recursive include of data files
     exclude_package_data = {"": ["__pycache__"]},
     package_data = {
-        '': ['*.yaml', "*.rules", "*.json", "requirements.txt", "*png"],
+        '': ['*.yaml', "*.rules", "*.json", "requirements.txt", "*png", "*yml", "*smk"]
         },
 
     zip_safe=False,
