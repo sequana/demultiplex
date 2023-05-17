@@ -10,6 +10,10 @@ mapping:
              type: str
              required: False
 
+  "apptainers":
+        type: any
+
+
   "bcl2fastq":
         type: map
         mapping:
