@@ -2,18 +2,24 @@
 .. image:: https://badge.fury.io/py/sequana-demultiplex.svg
      :target: https://pypi.python.org/pypi/sequana_demultiplex
 
-.. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
-    :target: http://joss.theoj.org/papers/10.21105/joss.00352
-    :alt: JOSS (journal of open source software) DOI
-
 .. image:: https://github.com/sequana/demultiplex/actions/workflows/main.yml/badge.svg
    :target: https://github.com/sequana/demultiplex/actions/workflows/main.yml
 
+.. image:: https://coveralls.io/repos/github/sequana/demultiplex/badge.svg?branch=main
+    :target: https://coveralls.io/github/sequana/demultiplex?branch=main
+
+.. image:: https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C3.10-blue.svg
+    :target: https://pypi.python.org/pypi/sequana
+    :alt: Python 3.8 | 3.9 | 3.10
+
+.. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
+   :target: http://joss.theoj.org/papers/10.21105/joss.00352
+   :alt: JOSS (journal of open source software) DOI
 
 This is is the **demultiplex** pipeline from the `Sequana <https://sequana.readthedocs.org>`_ projet
 
 :Overview: Runs bcl2fastq on raw BCL data and creates plots to ease the QC validation
-:Input: A valid Illumina base calling directory
+:Input: A valid Illumina base calling directory and sample sheet file
 :Output: An HTML report, a set of PNG files and the expected FastQ files
 :Status: production
 :Wiki: https://github.com/sequana/demultiplex/wiki
@@ -68,7 +74,7 @@ This pipeline requires the following third-party tool(s):
 - bcl2fastq 2.20.0
 
 This software has an end-user license agreement (EULA). Given the EULA details
-of this software, it cannot be distributed by us but only by Illumina.
+of this software, it cannot be distributed according to ` Illumina license <https://support.illumina.com/content/dam/illumina-support/documents/downloads/software/bcl2fastq/bcl2fastq2-v2-20-eula.pdf>`_
 Therefore, you should install it yourself. On cluster facility, you may ask to
 your system administator. For instance::
 
@@ -110,6 +116,7 @@ Changelog
 ========= =======================================================================
 Version   Description
 ========= =======================================================================
+1.3.0     * use latest sequana-wrappers to benefit and graphivz apptainer
 1.2.1     * Update CI action and use new sequana_pipetools v0.9.0
 1.2.0     * stable release with cleanup of the setup and README
 1.1.3     * add the --mars-seq option that fills the config automatically

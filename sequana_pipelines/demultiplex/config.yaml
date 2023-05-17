@@ -26,7 +26,12 @@
 #   NextSeq sequencers for instance.
 #
 general:
-  input_directory: 
+  input_directory:
+
+
+apptainers:
+  graphviz: "https://zenodo.org/record/7928262/files/graphviz_7.0.5.img"
+
 
 ###################################################################################
 #

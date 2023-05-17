@@ -33,6 +33,9 @@ from sequana import logger as log
 # This must be defined before the include
 configfile: "config.yaml"
 
+sequana_wrapper_branch = "main"
+
+
 # A convenient manager
 manager = PipelineManagerDirectory("demultiplex", config)
 
@@ -76,16 +79,17 @@ rule plot_unknown_barcodes:
         png= "barcodes.png"
     run:
         from sequana.demultiplex import StatsFile
+        from pylab import savefig
+        import pandas as pd
+
         s = StatsFile(input[0])
         df = s.plot_unknown_barcodes()
-        from pylab import savefig
         savefig(output.png, dpi=200)
         df.to_csv(output.csv20)
 
         # df contains the best 20 undetermined barcode, let us save all of them
         # for the users.
         ub = s.data['UnknownBarcodes']
-        import pandas as pd
         df = pd.DataFrame({x['Lane']:x['Barcodes'] for x in ub})
         df.columns = ["Lane {}".format(x) for x in df.columns]
         df.to_csv(output.csv)
@@ -98,7 +102,6 @@ rule check_samplesheet:
         """
         sequana samplesheet --check {input[0]} 2> {output[0]}
         """
-
 
 rule bcl2fastq:
     input:
@@ -118,7 +121,6 @@ rule bcl2fastq:
        **config['bcl2fastq']['resources']
     wrapper:
         "main/wrappers/bcl2fastq"
-
 
 
 rule plot_barplot_samples:
@@ -145,14 +147,27 @@ rule plot_summary:
 
 
 rule rulegraph:
-    input: manager.snakefile
+    input:
+        workflow.snakefile
     output:
-        svg = ".sequana/rulegraph.svg"
+        "rulegraph/rulegraph.dot"
     params:
         mapper = {},
         configname = "config.yaml"
     wrapper:
-        "main/wrappers/rulegraph"
+        f"{sequana_wrapper_branch}/wrappers/rulegraph"
+
+
+rule dot2svg:
+    input:
+        "rulegraph/rulegraph.dot"
+    output:
+        ".sequana/rulegraph.svg"
+    container:
+        config['apptainers']['graphviz']
+    shell:
+        """dot -Tsvg {input} -o {output}"""
+
 
 localrules: rulegraph, check_samplesheet
 
