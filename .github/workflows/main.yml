@@ -55,7 +55,7 @@ jobs:
     - name: Create env, install bcl2fastq
       run: |
         bash
-        damona env --create TEST
+        damona create TEST
         damona activate TEST
         damona install bcl2fastq
       env:
