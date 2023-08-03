@@ -38,6 +38,9 @@ configfile: "config.yaml"
 # A convenient manager
 manager = PipelineManagerDirectory("demultiplex", config)
 
+# should be part of PipelineManagerDirectory
+manager.wrappers = config.get("sequana_wrappers", "main")
+
 
 samplesheet = config['bcl2fastq']['samplesheet_file'].strip()
 
