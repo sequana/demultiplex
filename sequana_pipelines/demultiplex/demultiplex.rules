@@ -33,7 +33,6 @@ from sequana import logger as log
 # This must be defined before the include
 configfile: "config.yaml"
 
-sequana_wrapper_branch = "main"
 
 
 # A convenient manager
@@ -120,7 +119,7 @@ rule bcl2fastq:
     resources:
        **config['bcl2fastq']['resources']
     wrapper:
-        "main/wrappers/bcl2fastq"
+        f"{manager.wrappers}/wrappers/bcl2fastq"
 
 
 rule plot_barplot_samples:
@@ -155,7 +154,7 @@ rule rulegraph:
         mapper = {},
         configname = "config.yaml"
     wrapper:
-        f"{sequana_wrapper_branch}/wrappers/rulegraph"
+        f"{manager.wrappers}/wrappers/rulegraph"
 
 
 rule dot2svg:

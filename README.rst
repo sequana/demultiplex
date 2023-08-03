@@ -116,6 +116,7 @@ Changelog
 ========= =======================================================================
 Version   Description
 ========= =======================================================================
+1.3.1     * use sequana_wrappers version in the config file
 1.3.0     * use latest sequana-wrappers to benefit and graphivz apptainer
 1.2.1     * Update CI action and use new sequana_pipetools v0.9.0
 1.2.0     * stable release with cleanup of the setup and README
