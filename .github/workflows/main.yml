@@ -29,12 +29,17 @@ jobs:
     - name: checkout git repo
       uses: actions/checkout@v2
 
-    - name: conda/mamba
-      uses: mamba-org/provision-with-micromamba@main
+    - name: Set up Python 3.X
+      uses: actions/setup-python@v2
       with:
-          environment-file: environment.yml
-          extra-specs: |
-            python=${{ matrix.python }}
+          python-version: ${{ matrix.python }}
+
+    - name: install apptainer
+      run: |
+        sudo add-apt-repository -y ppa:apptainer/ppa
+        sudo apt update
+        sudo apt install -y apptainer
+        singularity version
 
     - name: install package itself
       shell: bash -l {0}
@@ -46,7 +51,7 @@ jobs:
       run: |
         pip install coveralls pytest-cov pytest pytest-xdist
         pip install damona
-        
+
     - name: Activate Damona
       run: |
         bash
