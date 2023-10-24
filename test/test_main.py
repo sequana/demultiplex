@@ -44,3 +44,4 @@ def test_standalone_baddies(tmp_path):
         cmd = cmd.format(bcldir, directory, "wrong")
         subprocess.call(cmd.split())
 
+

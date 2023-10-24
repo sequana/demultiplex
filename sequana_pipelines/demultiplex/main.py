@@ -60,7 +60,7 @@ class Options(argparse.ArgumentParser):
             The 'merge' choice merges all lanes. The 'none' choice do NOT merge the lanes.
             For NextSeq runs, we should merge the lanes; if users demultiplex NextSeq
             and set this option to none, an error is raised. If you still want to
-            skip the merging step, then set this option to 'none_and_force'""")
+            skip the merging step, then set this option to 'none_and_force'. For sc-atac seq, use merge.""")
         pipeline_group.add_argument("--bcl-directory", dest="bcl_directory",
             required=True, help="""Directory towards the raw BCL files. This directory should
             contains files such as RunParameters.xml, RunInfo.xml """)
@@ -81,6 +81,8 @@ set it back""")
         self.add_argument("--mars-seq", default=False, action="store_true",
             help="""Set options to  --minimum-trimmed-read-length 15 --mask-short-adapter-reads 15 
 and do not merge lanes""")
+        self.add_argument("--scatac-seq", default=False, action="store_true",
+            help="""Set options to perform single cell ATAC demultiplexing using cellranger.""")
         self.add_argument("--run", default=False, action="store_true",
             help="execute the pipeline directly")
 
@@ -127,15 +129,6 @@ def main(args=None):
         logger.error(f"{options.bcl_directory} file does not exists")
         sys.exit(1)
 
-    # Check the sample sheet
-    from sequana import iem
-    try:
-        samplesheet = iem.IEM(options.samplesheet)
-        samplesheet.validate()
-    except Exception as err:
-        logger.critical(err)
-        logger.critical("""Your sample sheet seems to be incorrect. Before running the pipeline
-you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
 
     # NextSeq
     runparam_1 = options.bcl_directory + os.sep + "RunParameters.xml"
@@ -170,12 +163,7 @@ you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
         cfg.general.input_directory = os.path.abspath(options.bcl_directory)
         cfg.bcl2fastq.threads = options.threads
         cfg.bcl2fastq.barcode_mismatch = options.mismatch
-        cfg.bcl2fastq.samplesheet_file = os.path.abspath(options.samplesheet)
-
-        from sequana.iem import IEM
-        ss = IEM(cfg.bcl2fastq.samplesheet_file)
-        ss.validate()
-
+        cfg.general.samplesheet_file = os.path.abspath(options.samplesheet)
 
         # this is defined by the working_directory
         #cfg.bcl2fastq.output_directory = "."
@@ -193,6 +181,19 @@ you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
             if options.merging_strategy in ["merge"]:
                 logger.warning("with --mars-seq option, the merging strategy should be none_and_force")
                 cfg.bcl2fastq.merge_all_lanes = False
+            cfg.general.mode = "bcl2fastq"
+        elif options.scatac_seq:
+            cfg.cellranger_atac.options = ""
+            cfg.general.mode = "cellranger_atac"
+        else: # All other cases with bcl2fastq
+            from sequana.iem import IEM
+            cfg.general.mode = "bcl2fastq"
+            try:
+                ss = IEM(cfg.general.samplesheet_file)
+                ss.validate()
+            except Exception as err:
+                logger.critical(err)
+                logger.critical("""Your sample sheet seems to be incorrect. Before running the pipeline you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
 
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.

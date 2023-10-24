@@ -15,7 +15,7 @@
 sequana_wrappers: "v0.15.1"
 
 #################################################################
-# bcl2fastq
+# general
 #
 # :Parameters:
 #
@@ -24,16 +24,19 @@ sequana_wrappers: "v0.15.1"
 #
 #   if merge_all_lanes is set to True, merged all lanes. This must be used with
 #   NextSeq sequencers for instance.
-#
+#  - mode must be set to bcl2fastq or cellranger_atac
 general:
   input_directory:
+  samplesheet_file:
+  mode: "bcl2fastq"
 
 
 apptainers:
   graphviz: "https://zenodo.org/record/7928262/files/graphviz_7.0.5.img"
-
+  cellranger_atac: "https://zenodo.org/record/8423332/files/cellranger_atac_2.1.0.img"
 
 ###################################################################################
+# bcl2fastq
 #
 #
 #
@@ -44,7 +47,6 @@ apptainers:
 bcl2fastq:
     threads: 4
     barcode_mismatch: 0
-    samplesheet_file: 
     ignore_missing_bcls: true
     no_bgzf_compression: true
     options: ''
@@ -52,3 +54,11 @@ bcl2fastq:
     resources:
         mem: 64G
 
+
+###################################################################################
+# cellranger_atac
+#
+cellranger_atac:
+    options: ''
+    resources:
+        mem: 64G

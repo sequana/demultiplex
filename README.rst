@@ -116,6 +116,8 @@ Changelog
 ========= =======================================================================
 Version   Description
 ========= =======================================================================
+1.4.0     * Implement demultiplexing of single cell ATAC seq data with 
+            cellranger.
 1.3.1     * use sequana_wrappers version in the config file
 1.3.0     * use latest sequana-wrappers to benefit and graphivz apptainer
 1.2.1     * Update CI action and use new sequana_pipetools v0.9.0

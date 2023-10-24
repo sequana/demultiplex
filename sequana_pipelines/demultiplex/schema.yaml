@@ -3,26 +3,32 @@
 
 type: map
 mapping:
-  "general":
-      type: map
-      mapping:
-          "input_directory":
-             type: str
-             required: False
+    "sequana_wrappers":
+        type: str
 
-  "apptainers":
+    "general":
+        type: map
+        mapping:
+            "input_directory":
+                type: str
+                required: False
+            "samplesheet_file":
+                type: str
+            "mode":
+                type: str
+                enum: ["bcl2fastq", "cellranger_atac"]
+
+    "apptainers":
         type: any
 
 
-  "bcl2fastq":
+    "bcl2fastq":
         type: map
         mapping:
             "threads":
                 type: int
             "barcode_mismatch": 
                 type: int
-            "samplesheet_file":
-                type: str
             "ignore_missing_controls":
                 type: bool
             "ignore_missing_bcls":
@@ -39,4 +45,11 @@ mapping:
                 type: any
                 required: true
 
-
+    "cellranger_atac":
+        type: map
+        mapping:
+            "options":
+                type: str
+            "resources":
+                type: any
+                required: true
