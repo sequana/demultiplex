@@ -114,9 +114,8 @@ elif config["general"]["mode"] == "cellranger_atac":
             samplesheet=config['general']['samplesheet_file']
         output:
             "Stats/Stats.json",
-            temp("TT")
         params:
-            id="TT",
+            id="_Temp",
             outdir=".",
             indir= config["general"]["input_directory"],
         container:
@@ -125,6 +124,7 @@ elif config["general"]["mode"] == "cellranger_atac":
            **config['cellranger_atac']['resources']
         shell:
             """
+            rm -f _Temp/_unlock
             cellranger-atac mkfastq --id {params.id} --run {params.indir} --csv {input.samplesheet}  \
                     --output-dir {params.outdir}
 
@@ -183,7 +183,7 @@ localrules: rulegraph
 
 onsuccess:
     shell("chmod -R g+w .")
-    manager.teardown()
+    manager.teardown(extra_dirs_to_remove=["_Temp"])
 
     from sequana.modules_report.summary import SummaryModule2
 
