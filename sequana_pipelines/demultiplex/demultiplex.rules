@@ -38,11 +38,7 @@ configfile: "config.yaml"
 # A convenient manager
 manager = PipelineManagerDirectory("demultiplex", config)
 
-# should be part of PipelineManagerDirectory
-manager.wrappers = config.get("sequana_wrappers", "main")
-
-
-samplesheet = config['bcl2fastq']['samplesheet_file'].strip()
+samplesheet = config['general']['samplesheet_file'].strip()
 
 
 if samplesheet.strip() != "":
@@ -51,16 +47,9 @@ if samplesheet.strip() != "":
         sys.exit(1)
 
 
-# Check the sample sheet
-try:
-    from sequana import iem
-    samplesheet = iem.IEM(samplesheet)
-    samplesheet.validate()
-except Exception as err:
-    log.error(err)
-    log.error("""Your sample sheet seems to be incorrect. Before running the pipeline
-you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
-    sys.exit(1)
+# check sample sheet for bcl2fastq only
+if config["general"]["mode"] == "bcl2fastq":
+    shell(f"sequana samplesheet --check {samplesheet}")
 
 
 rule pipeline:
@@ -97,36 +86,54 @@ rule plot_unknown_barcodes:
         df.to_csv(output.csv)
 
 
-rule check_samplesheet:
-    input: config['bcl2fastq']['samplesheet_file']
-    output: temp("ss.log")
-    shell:
-        """
-        sequana samplesheet --check {input[0]} 2> {output[0]}
-        """
 
-rule bcl2fastq:
-    input:
-        valid_samplesheet="ss.log",
-        samplesheet=config['bcl2fastq']['samplesheet_file']
-    output:
-        "Stats/Stats.json",
-    params:
-        indir= config["general"]["input_directory"],
-        barcode_mismatch=config['bcl2fastq']['barcode_mismatch'],
-        ignore_missing_bcls=config['bcl2fastq']['ignore_missing_bcls'],
-        no_bgzf_compression=config['bcl2fastq']['no_bgzf_compression'],
-        merge_all_lanes=config['bcl2fastq']['merge_all_lanes'],
-        options=config['bcl2fastq']['options']
-    threads: config['bcl2fastq']['threads']
-    resources:
-       **config['bcl2fastq']['resources']
-    wrapper:
-        f"{manager.wrappers}/wrappers/bcl2fastq"
+if config["general"]["mode"] == "bcl2fastq":
+
+    rule bcl2fastq:
+        input:
+            samplesheet=config['general']['samplesheet_file']
+        output:
+            "Stats/Stats.json",
+        params:
+            indir= config["general"]["input_directory"],
+            barcode_mismatch=config['bcl2fastq']['barcode_mismatch'],
+            ignore_missing_bcls=config['bcl2fastq']['ignore_missing_bcls'],
+            no_bgzf_compression=config['bcl2fastq']['no_bgzf_compression'],
+            merge_all_lanes=config['bcl2fastq']['merge_all_lanes'],
+            options=config['bcl2fastq']['options']
+        threads: config['bcl2fastq']['threads']
+        resources:
+           **config['bcl2fastq']['resources']
+        wrapper:
+            f"{manager.wrappers}/wrappers/bcl2fastq"
+
+elif config["general"]["mode"] == "cellranger_atac":
+
+    rule cellranger_atac:
+        input:
+            samplesheet=config['general']['samplesheet_file']
+        output:
+            "Stats/Stats.json",
+            temp("TT")
+        params:
+            id="TT",
+            outdir=".",
+            indir= config["general"]["input_directory"],
+        container:
+            "https://zenodo.org/record/8423332/files/cellranger_atac_2.1.0.img"
+        resources:
+           **config['cellranger_atac']['resources']
+        shell:
+            """
+            cellranger-atac mkfastq --id {params.id} --run {params.indir} --csv {input.samplesheet}  \
+                    --output-dir {params.outdir}
+
+            """
 
 
 rule plot_barplot_samples:
-    input:  "Stats/Stats.json"
+    input:
+        "Stats/Stats.json"
     output:
         barplot="samples.png"
     run:
@@ -171,7 +178,7 @@ rule dot2svg:
         """dot -Tsvg {input} -o {output}"""
 
 
-localrules: rulegraph, check_samplesheet
+localrules: rulegraph
 
 
 onsuccess:
