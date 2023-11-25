@@ -3,9 +3,6 @@
 #
 #  Copyright (c) 2016-2021 - Sequana Development Team
 #
-#  File author(s):
-#      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
-#
 #  Distributed under the terms of the 3-clause BSD license.
 #  The full license is in the LICENSE file, distributed with this software.
 #
@@ -15,109 +12,108 @@
 ##############################################################################
 import sys
 import os
-import argparse
-import subprocess
 
-from sequana_pipetools.options import *
-from sequana_pipetools.misc import Colors
-from sequana_pipetools.info import sequana_epilog, sequana_prolog
-from sequana_pipetools import SequanaManager
+import rich_click as click
+import click_completion
 
-col = Colors()
+click_completion.init()
 
 NAME = "demultiplex"
 
+from sequana_pipetools.options import *
+from sequana_pipetools import SequanaManager
 
-class Options(argparse.ArgumentParser):
-    def __init__(self, prog=NAME, epilog=None):
-        usage = col.purple(sequana_prolog.format(**{"name": NAME}))
-        super(Options, self).__init__(usage=usage, prog=prog, description="",
-            epilog=epilog,
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter
-        )
+help = init_click(
+    NAME,
+    groups={
+        "Pipeline Specific": ["--method", "--skip-multiqc"],
+    },
+)
 
-        # add a new group of options to the parser
-        # demultiplex requires lots of memory sometimes hence the 64G options
-        #
-        so = SlurmOptions(queue="biomicspole", memory="64000", cores=16)
-        so.add_options(self)
 
-        # add a snakemake group of options to the parser
-        so = SnakemakeOptions(working_directory="fastq")
-        so.add_options(self)
-
-        so = GeneralOptions()
-        so.add_options(self)
-
-        pipeline_group = self.add_argument_group("pipeline")
-
-        pipeline_group.add_argument("--threads", dest="threads", default=4,
-            type=int, help="Number of threads to use during the demultiplexing. ")
-        pipeline_group.add_argument("--barcode-mismatch", dest="mismatch", default=0, type=int)
-        pipeline_group.add_argument("--merging-strategy", required=True,
-            dest="merging_strategy", choices=["merge", "none", "none_and_force"],
-            help="""Merge Lanes or not. options are : merge, none, none_and_force.
+@click.command(context_settings=help)
+@include_options_from(ClickSnakemakeOptions, working_directory=NAME)
+@include_options_from(ClickSlurmOptions)
+@include_options_from(ClickInputOptions, add_input_readtag=False)
+@include_options_from(ClickGeneralOptions)
+@click.option(
+    "--threads",
+    "threads",
+    default=4,
+    show_default=True,
+    type=click.INT,
+    help="Number of threads to use during the demultiplexing. ",
+)
+@click.option("--barcode-mismatch", "mismatch", default=0, type=click.INT, show_default=True)
+@click.option(
+    "--merging-strategy",
+    "merging_strategy",
+    required=True,
+    type=click.Choice(["merge", "none", "none_and_force"]),
+    help="""Merge Lanes or not. options are : merge, none, none_and_force.
             The 'merge' choice merges all lanes. The 'none' choice do NOT merge the lanes.
             For NextSeq runs, we should merge the lanes; if users demultiplex NextSeq
             and set this option to none, an error is raised. If you still want to
-            skip the merging step, then set this option to 'none_and_force'. For sc-atac seq, use merge.""")
-        pipeline_group.add_argument("--bcl-directory", dest="bcl_directory",
-            required=True, help="""Directory towards the raw BCL files. This directory should
-            contains files such as RunParameters.xml, RunInfo.xml """)
-        pipeline_group.add_argument("--sample-sheet", dest="samplesheet",
-            required=True,
-            default="SampleSheet.csv", help="Sample sheet filename to be used")
-        pipeline_group.add_argument("--no-ignore-missing-bcls",
-            dest="no_ignore_missing_bcls", action="store_true", default=False,
-            help="""In bcl2fastq, the option --ignore-missing-bcls implies that
+            skip the merging step, then set this option to 'none_and_force'. For sc-atac seq, use merge.""",
+)
+@click.option(
+    "--bcl-directory",
+    "bcl_directory",
+    required=True,
+    help="""Directory towards the raw BCL files. This directory should
+            contains files such as RunParameters.xml, RunInfo.xml """,
+)
+@click.option(
+    "--sample-sheet",
+    "samplesheet",
+    required=True,
+    default="SampleSheet.csv",
+    show_default=True,
+    help="Sample sheet filename to be used",
+)
+@click.option(
+    "--no-ignore-missing-bcls",
+    "no_ignore_missing_bcls",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="""In bcl2fastq, the option --ignore-missing-bcls implies that
 we assume 'N'/'#' for missing calls. In Sequana_demultiplex, we use that option
 by default. If you do not want that behviour, but the one from bcl2fastq, use
-this flag(--no-ignore-missing-bcls)""")
-        pipeline_group.add_argument("--bgzf-compression",
-            dest="bgzf_compression", action="store_true", default=False,
-            help="""turn on BGZF compression for FASTQ files. By default,
+this flag(--no-ignore-missing-bcls)""",
+)
+@click.option(
+    "--bgzf-compression",
+    "bgzf_compression",
+    is_flag=True,
+    show_default=False,
+    help="""turn on BGZF compression for FASTQ files. By default,
 bcl2fastq uses this option; By default we don't. Set --bgzl--compression flag to
-set it back""")
-        self.add_argument("--mars-seq", default=False, action="store_true",
-            help="""Set options to  --minimum-trimmed-read-length 15 --mask-short-adapter-reads 15 
-and do not merge lanes""")
-        self.add_argument("--scatac-seq", default=False, action="store_true",
-            help="""Set options to perform single cell ATAC demultiplexing using cellranger.""")
-        self.add_argument("--run", default=False, action="store_true",
-            help="execute the pipeline directly")
-
-    def parse_args(self, *args):
-        args_list = list(*args)
-        if "--from-project" in args_list:
-            if len(args_list)>2:
-                msg = "WARNING [sequana]: With --from-project option, " + \
-                        "pipeline and data-related options will be ignored."
-                print(col.error(msg))
-            for action in self._actions:
-                if action.required is True:
-                    action.required = False
-        options = super(Options, self).parse_args(*args)
-        return options
-
-def main(args=None):
-
-    if args is None:
-        args = sys.argv
-
-    # whatever needs to be called by all pipeline before the options parsing
-    from sequana_pipetools.options import before_pipeline
-    before_pipeline(NAME)
-
-    # option parsing including common epilog
-    options = Options(NAME, epilog=sequana_epilog).parse_args(args[1:])
-
-
+set it back""",
+)
+@click.option(
+    "--mars-seq",
+    default=False,
+    is_flag=True,
+    show_default=True,
+    help="""Set options to--minimum-trimmed-read-length 15 --mask-short-adapter-reads 15 
+and do not merge lanes""",
+)
+@click.option(
+    "--scatac-seq",
+    default=False,
+    is_flag="store_true",
+    help="""Set options to perform single cell ATAC demultiplexing using cellranger.""",
+)
+def main(**options):
     # the real stuff is here
     manager = SequanaManager(options, NAME)
+    options = manager.options
 
     # create the beginning of the command and the working directory
     manager.setup()
     from sequana import logger
+
     logger.setLevel(options.level)
 
     # ============================================== sanity checks
@@ -128,7 +124,6 @@ def main(args=None):
     if not os.path.exists(options.bcl_directory):
         logger.error(f"{options.bcl_directory} file does not exists")
         sys.exit(1)
-
 
     # NextSeq
     runparam_1 = options.bcl_directory + os.sep + "RunParameters.xml"
@@ -158,49 +153,49 @@ def main(args=None):
                     logger.warning(msg)
                     sys.exit(1)
 
-    if options.from_project is None:
-        cfg = manager.config.config
-        cfg.general.input_directory = os.path.abspath(options.bcl_directory)
-        cfg.bcl2fastq.threads = options.threads
-        cfg.bcl2fastq.barcode_mismatch = options.mismatch
-        cfg.general.samplesheet_file = os.path.abspath(options.samplesheet)
+    cfg = manager.config.config
+    cfg.general.input_directory = os.path.abspath(options.bcl_directory)
+    cfg.bcl2fastq.threads = options.threads
+    cfg.bcl2fastq.barcode_mismatch = options.mismatch
+    cfg.general.samplesheet_file = os.path.abspath(options.samplesheet)
 
-        # this is defined by the working_directory
-        #cfg.bcl2fastq.output_directory = "."
-        cfg.bcl2fastq.ignore_missing_bcls = not options.no_ignore_missing_bcls
-        cfg.bcl2fastq.no_bgzf_compression = not options.bgzf_compression
+    # this is defined by the working_directory
+    # cfg.bcl2fastq.output_directory = "."
+    cfg.bcl2fastq.ignore_missing_bcls = not options.no_ignore_missing_bcls
+    cfg.bcl2fastq.no_bgzf_compression = not options.bgzf_compression
 
-        if options.merging_strategy == "merge":
-            cfg.bcl2fastq.merge_all_lanes = True
-        elif options.merging_strategy in  ["none", "none_and_force"]:
+    if options.merging_strategy == "merge":
+        cfg.bcl2fastq.merge_all_lanes = True
+    elif options.merging_strategy in ["none", "none_and_force"]:
+        cfg.bcl2fastq.merge_all_lanes = False
+
+    #
+    if options.mars_seq:
+        cfg.bcl2fastq.options = " --minimum-trimmed-read-length 15 --mask-short-adapter-reads 15 "
+        if options.merging_strategy in ["merge"]:
+            logger.warning("with --mars-seq option, the merging strategy should be none_and_force")
             cfg.bcl2fastq.merge_all_lanes = False
+        cfg.general.mode = "bcl2fastq"
+    elif options.scatac_seq:
+        cfg.cellranger_atac.options = ""
+        cfg.general.mode = "cellranger_atac"
+    else:  # All other cases with bcl2fastq
+        from sequana.iem import IEM
 
-        #
-        if options.mars_seq:
-            cfg.bcl2fastq.options = " --minimum-trimmed-read-length 15 --mask-short-adapter-reads 15 "
-            if options.merging_strategy in ["merge"]:
-                logger.warning("with --mars-seq option, the merging strategy should be none_and_force")
-                cfg.bcl2fastq.merge_all_lanes = False
-            cfg.general.mode = "bcl2fastq"
-        elif options.scatac_seq:
-            cfg.cellranger_atac.options = ""
-            cfg.general.mode = "cellranger_atac"
-        else: # All other cases with bcl2fastq
-            from sequana.iem import IEM
-            cfg.general.mode = "bcl2fastq"
-            try:
-                ss = IEM(cfg.general.samplesheet_file)
-                ss.validate()
-            except Exception as err:
-                logger.critical(err)
-                logger.critical("""Your sample sheet seems to be incorrect. Before running the pipeline you will have to fix it. You may use 'sequana samplesheet --quick-fix'""")
+        cfg.general.mode = "bcl2fastq"
+        try:
+            ss = IEM(cfg.general.samplesheet_file)
+            ss.validate()
+        except Exception as err:
+            logger.critical(err)
+            logger.critical(
+                """Your sample sheet seems to be incorrect. Before running the pipeline you will have to fix it. You may use 'sequana samplesheet --quick-fix'"""
+                )
 
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.
     manager.teardown(check_input_files=False)
 
-    if options.run:
-        subprocess.Popen(["sh", '{}.sh'.format(NAME)], cwd=options.workdir)
 
 if __name__ == "__main__":
     main()
