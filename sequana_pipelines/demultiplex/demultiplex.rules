@@ -59,6 +59,7 @@ rule pipeline:
         "barcodes.png",
         "samples.png",
         "summary.png",
+        "multiqc/multiqc_report.html",
         ".sequana/rulegraph.svg",
 
 
@@ -155,6 +156,34 @@ rule plot_summary:
         s.to_summary_reads(output.summary)
 
 
+
+# ========================================================== multiqc
+multiqc_params_options = config['multiqc']['options']
+if manager.config.multiqc.config_file:
+    multiqc_params_options += f" -c {manager.config.multiqc.config_file}"
+
+rule multiqc:
+    input:
+        "Stats/Stats.json",
+        "Stats/summary.txt",
+    output:
+       "multiqc/multiqc_report.html"
+    params:
+        options=multiqc_params_options,
+        input_directory=config['multiqc']['input_directory'],
+        config_file=config['multiqc']['config_file'],
+        modules=config['multiqc']['modules']
+    log:
+        "multiqc/multiqc.log"
+    resources:
+        **config["multiqc"]["resources"]
+    container:
+        config["apptainers"]["multiqc"]
+    wrapper:
+       f"{manager.wrappers}/wrappers/multiqc"
+
+
+
 rule rulegraph:
     input:
         workflow.snakefile
@@ -183,18 +212,22 @@ localrules: rulegraph
 
 onsuccess:
     shell("chmod -R g+w .")
+ 
+    from sequana_pipelines import demultiplex
+    from sequana.modules_report.summary import SequanaReport
+
     manager.teardown(extra_dirs_to_remove=["_Temp"])
+    manager.clean_multiqc(rules.multiqc.output[0])
 
-    from sequana.modules_report.summary import SummaryModule2
 
-    image1 = SummaryModule2.png_to_embedded_png("dummy", "barcodes.png",
+    image1 = SequanaReport.png_to_embedded_png("dummy", "barcodes.png",
                 style="text-align:center; width:60%; height:40%", 
                 alt="barcodes")
 
-    image2 = SummaryModule2.png_to_embedded_png("dummy", "summary.png",
+    image2 = SequanaReport.png_to_embedded_png("dummy", "summary.png",
                 style="width:60%; height:40%", alt="summary")
 
-    image3 = SummaryModule2.png_to_embedded_png("dummy", "samples.png",
+    image3 = SequanaReport.png_to_embedded_png("dummy", "samples.png",
                 style="width:60%; height:40%", alt="sample")
 
 
@@ -218,17 +251,11 @@ The following image is similar. Instead of showing the index, we show here the n
 
 </div>""".format(image1, image2, image3)
 
-    from sequana_pipelines import demultiplex
-    data = {
-            "name": manager.name,
-            "stats": "stats.txt", 
-            "rulegraph": ".sequana/rulegraph.svg",
-            "pipeline_version": demultiplex.version
-            }
-    s = SummaryModule2(data, intro=intro)
+
+    data = manager.getmetadata()
+    s = SequanaReport(data, intro=intro)
+
 
 onerror:
-    from sequana_pipetools.errors import PipeError
-    p = PipeError("demultiplex")
-    p.status()
+    manager.onerror()
 

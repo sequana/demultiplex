@@ -34,6 +34,7 @@ general:
 apptainers:
   graphviz: "https://zenodo.org/record/7928262/files/graphviz_7.0.5.img"
   cellranger_atac: "https://zenodo.org/record/8423332/files/cellranger_atac_2.1.0.img"
+  multiqc: https://zenodo.org/record/10205070/files/multiqc_1.16.0.img
 
 ###################################################################################
 # bcl2fastq
@@ -62,3 +63,21 @@ cellranger_atac:
     options: ''
     resources:
         mem: 64G
+
+#############################################################################
+##   MultiQC aggregates results from bioinformatics analyses across many
+##   samples into a single report.
+##
+## :Parameters:
+##
+## - options: any options recognised by multiqc
+## - config_file: by default, we use sequana RNA-seq multiqc_config file.
+##       If you want your own multiqc, fill this entry
+multiqc:
+    options: -p -f
+    modules: bcl2fastq
+    input_directory: .
+    config_file: multiqc_config.yaml
+    resources:
+        mem: 8G
+
