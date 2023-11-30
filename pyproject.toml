@@ -1,0 +1,52 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "sequana-demultiplex"
+version = "1.5.0"
+description = "Pipeline that runs bcl2fastq and ease demultiplexing of Sequencing data"
+authors = ["Sequana Team"]
+license = "BSD-3"
+repository = "https://github.com/sequana/demultiplex"
+readme = "README.rst"
+keywords = ["bcl2fastq", "Illumina", "sequana", "base caller", "demultiplexing"]
+classifiers = [
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Education",
+        "Intended Audience :: End Users/Desktop",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+packages = [
+    {include = "sequana_pipelines"}
+]
+
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4.0"
+sequana = ">=0.15.0"
+sequana_pipetools = ">=0.16.1"
+click-completion = "^0.5.2"
+
+
+[tool.poetry.scripts]
+sequana_demultiplex = "sequana_pipelines.demultiplex.main:main"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+pytest = "^7.4.0"
+mock = "^5.1.0"
+pytest-mock = "^3.11.1"
+pytest-cov = "^4.1.0"
+

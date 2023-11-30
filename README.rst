@@ -116,6 +116,7 @@ Changelog
 ========= =======================================================================
 Version   Description
 ========= =======================================================================
+1.5.0     * Uses click and new sequana_pipetools, add multiqc
 1.4.0     * Implement demultiplexing of single cell ATAC seq data with 
             cellranger.
 1.3.1     * use sequana_wrappers version in the config file
