@@ -10,18 +10,18 @@
 #  documentation: http://sequana.readthedocs.io
 #
 ##############################################################################
-import sys
 import os
+import sys
 
-import rich_click as click
 import click_completion
+import rich_click as click
 
 click_completion.init()
 
 NAME = "demultiplex"
 
-from sequana_pipetools.options import *
 from sequana_pipetools import SequanaManager
+from sequana_pipetools.options import *
 
 help = init_click(
     NAME,
@@ -32,7 +32,7 @@ help = init_click(
 
 
 @click.command(context_settings=help)
-@include_options_from(ClickSnakemakeOptions, working_directory=NAME)
+@include_options_from(ClickSnakemakeOptions, working_directory="fastq")
 @include_options_from(ClickSlurmOptions)
 @include_options_from(ClickInputOptions, add_input_readtag=False)
 @include_options_from(ClickGeneralOptions)
@@ -96,7 +96,7 @@ set it back""",
     default=False,
     is_flag=True,
     show_default=True,
-    help="""Set options to--minimum-trimmed-read-length 15 --mask-short-adapter-reads 15 
+    help="""Set options to--minimum-trimmed-read-length 15 --mask-short-adapter-reads 15
 and do not merge lanes""",
 )
 @click.option(
@@ -190,7 +190,7 @@ def main(**options):
             logger.critical(err)
             logger.critical(
                 """Your sample sheet seems to be incorrect. Before running the pipeline you will have to fix it. You may use 'sequana samplesheet --quick-fix'"""
-                )
+            )
 
     # finalise the command and save it; copy the snakemake. update the config
     # file and save it.
