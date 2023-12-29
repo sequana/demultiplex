@@ -1,3 +1,0 @@
-- bcl2fastq
-- dot
-- cellranger-atac

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "sequana-demultiplex"
-version = "1.5.1"
+version = "1.5.2"
 description = "Pipeline that runs bcl2fastq and ease demultiplexing of Sequencing data"
 authors = ["Sequana Team"]
 license = "BSD-3"
