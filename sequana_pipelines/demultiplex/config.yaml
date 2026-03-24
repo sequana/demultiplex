@@ -31,6 +31,8 @@ general:
 
 apptainers:
   graphviz: "https://zenodo.org/record/7928262/files/graphviz_7.0.5.img"
+  bcl2fastq: "https://zenodo.org/record/13304101/files/bcl2fastq_2.20.0.img"
+  bcl_convert: "https://zenodo.org/record/10934031/files/bclconvert_4.2.7.img"
   cellranger_atac: "https://zenodo.org/record/8423332/files/cellranger_atac_2.1.0.img"
   multiqc: https://zenodo.org/record/10205070/files/multiqc_1.16.0.img
 

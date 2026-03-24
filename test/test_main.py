@@ -10,6 +10,7 @@ from click.testing import CliRunner
 from . import test_dir
 
 samplesheet = f"{test_dir}/data/SampleSheet.csv"
+samplesheet_bclconvert = f"{test_dir}/data/SampleSheet_bclconvert.csv"
 bcldir = f"{test_dir}/data/bcl"
 
 def test_help():
@@ -34,6 +35,17 @@ def test_standalone_script(tmp_path):
 
     runner = CliRunner()
     results = runner.invoke(main, ["--bcl-directory", bcldir, "--merging-strategy", "merge", "--working-directory", str(directory), "--force", "--sample-sheet", samplesheet])
+    assert results.exit_code == 0
+
+
+def test_standalone_bclconvert(tmp_path):
+    directory = tmp_path / "test"
+    directory.mkdir()
+
+    runner = CliRunner()
+    results = runner.invoke(main, ["--bcl-directory", bcldir, "--merging-strategy", "merge",
+        "--working-directory", str(directory), "--force",
+        "--sample-sheet", samplesheet_bclconvert, "--use-bcl-convert"])
     assert results.exit_code == 0
 
 

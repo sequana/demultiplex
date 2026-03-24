@@ -52,6 +52,8 @@ if config["general"]["mode"] == "bcl2fastq":
     shell(f"sequana samplesheet --check {samplesheet}")
 
 
+mode = config["general"]["mode"]
+
 rule pipeline:
     input:
         "Stats/summary.txt",
@@ -88,7 +90,7 @@ rule plot_unknown_barcodes:
 
 
 
-if config["general"]["mode"] == "bcl2fastq":
+if mode == "bcl2fastq":
 
     rule bcl2fastq:
         input:
@@ -108,10 +110,12 @@ if config["general"]["mode"] == "bcl2fastq":
         threads: config['bcl2fastq']['threads']
         resources:
            **config['bcl2fastq']['resources']
+        container:
+            config['apptainers']['bcl2fastq']
         shell:
             manager.get_shell("bcl2fastq/run", "v1")
 
-elif config["general"]["mode"] == "cellranger_atac":
+elif mode == "cellranger_atac":
 
     rule cellranger_atac:
         input:
@@ -123,7 +127,7 @@ elif config["general"]["mode"] == "cellranger_atac":
             outdir=".",
             indir= config["general"]["input_directory"],
         container:
-            "https://zenodo.org/record/8423332/files/cellranger_atac_2.1.0.img"
+            config['apptainers']['cellranger_atac']
         resources:
            **config['cellranger_atac']['resources']
         shell:
@@ -134,44 +138,85 @@ elif config["general"]["mode"] == "cellranger_atac":
 
             """
 
-elif config["general"]["mode"] == "bclconvert":
+elif mode == "bclconvert":
     rule bclconvert:
         input:
             samplesheet=config['general']['samplesheet_file']
         output:
-            "Stats/Stats.json",
+            "Reports/Demultiplex_Stats.csv",
         params:
-            indir= config["general"]["input_directory"],
-            #ignore_missing_bcls=config['bclconvert']['ignore_missing_bcls'],
-            bcl_sampleproject_subdirectories=config['bclconvert']['bcl_sampleproject_subdirectories'],
-            merge_all_lanes=config['bclconvert']['merge_all_lanes'],
+            indir=config["general"]["input_directory"],
+            bcl_sampleproject_subdirectories="true" if config['bclconvert']['bcl_sampleproject_subdirectories'] else "false",
+            no_lane_splitting="--no-lane-splitting true" if config['bclconvert']['merge_all_lanes'] else "--no-lane-splitting false",
             options=config['bclconvert']['options']
         threads: config['bclconvert']['threads']
         resources:
            **config['bclconvert']['resources']
+        container:
+            config['apptainers']['bcl_convert']
         shell:
             """
-
-            PWD = `pwd`
-            bcl-convert --sample-sheet {input.samplesheet} --bcl-input-directory {params.indir} \
-                --output-directory ${PWD}    --force \
-                # make sure to use those options for cluster usage. indeed default is number of available CPU
-                #
-                --bcl-num-conversion-threads {snakemake.threads} \
-                --bcl-num-compression-threads {snakemake.threads} \
-                # command line --ignore-missing-bcls not supported anymore. Must be in the sample sheet as
-                # BarcodeMismatchIndex1,# and BarcodeMismatchIndex2,#
-                --no-lane-splitting {params.merge_all_lanes}
-                # " --no-bgzf-compression " does not exist anymore
-                #
-                # unlike bcl2fastq, sample project is ignore and all fastq stored in 1 main directory.
-                # use --bcl-sampleproject-subdirectories we have same behaviour as in bcl2fastq
-                --bcl-sampleproject-subdirectories {params.bcl_sampleproject_subdirectories}
-                # SAMPLE ID is used to  name the files ; sample name is not used except if used with
-                # --sample-name-column-enabled true in which case the fastq files are 
-                # name project/ID/Name.fastq.gz
-                
+            bcl-convert --sample-sheet {input.samplesheet} \
+                --bcl-input-directory {params.indir} \
+                --output-directory . \
+                --force \
+                --bcl-num-conversion-threads {threads} \
+                --bcl-num-compression-threads {threads} \
+                --bcl-sampleproject-subdirectories {params.bcl_sampleproject_subdirectories} \
+                {params.no_lane_splitting} \
+                {params.options}
             """
+
+    rule bclconvert_to_stats_json:
+        """Convert bclconvert Reports CSVs into the Stats/Stats.json format
+        expected by the sequana StatsFile class, so all downstream plot rules
+        can be reused without modification."""
+        input:
+            demux="Reports/Demultiplex_Stats.csv",
+        output:
+            "Stats/Stats.json",
+        run:
+            import json, os
+            import pandas as pd
+
+            demux = pd.read_csv(input.demux)
+
+            barcodes_file = "Reports/Top_Unknown_Barcodes.csv"
+            barcodes = pd.read_csv(barcodes_file) if os.path.exists(barcodes_file) else pd.DataFrame(columns=["Lane", "index", "index2", "# Reads"])
+
+            # Build ConversionResults grouped by lane
+            conversion_results = []
+            for lane_num, lane_df in demux.groupby("Lane"):
+                demux_results = []
+                undetermined_reads = 0
+                for _, row in lane_df.iterrows():
+                    if row["SampleID"] == "Undetermined":
+                        undetermined_reads = int(row["# Reads"])
+                    else:
+                        demux_results.append({
+                            "SampleId": row["SampleID"],
+                            "NumberReads": int(row["# Reads"]),
+                        })
+                conversion_results.append({
+                    "LaneNumber": int(lane_num),
+                    "DemuxResults": demux_results,
+                    "Undetermined": {"NumberReads": undetermined_reads},
+                })
+
+            # Build UnknownBarcodes grouped by lane
+            unknown_barcodes = []
+            for lane_num, lane_df in barcodes.groupby("Lane"):
+                barcode_dict = {}
+                for _, row in lane_df.iterrows():
+                    idx2 = row.get("index2", "")
+                    key = f"{row['index']}+{idx2}" if pd.notna(idx2) and str(idx2).strip() else str(row["index"])
+                    barcode_dict[key] = int(row["# Reads"])
+                unknown_barcodes.append({"Lane": int(lane_num), "Barcodes": barcode_dict})
+
+            os.makedirs("Stats", exist_ok=True)
+            with open(output[0], "w") as fh:
+                json.dump({"ConversionResults": conversion_results,
+                           "UnknownBarcodes": unknown_barcodes}, fh, indent=2)
 
 rule plot_barplot_samples:
     input:
@@ -197,23 +242,28 @@ rule plot_summary:
         s.to_summary_reads(output.summary)
 
 
-
 # ========================================================== multiqc
 multiqc_params_options = config['multiqc']['options']
 if manager.config.multiqc.config_file:
     multiqc_params_options += f" -c {manager.config.multiqc.config_file}"
 
+if mode == "bclconvert":
+    _multiqc_input = "Reports/Demultiplex_Stats.csv"
+    _multiqc_module = "bclconvert"
+else:
+    _multiqc_input = ["Stats/Stats.json", "Stats/summary.txt"]
+    _multiqc_module = config['multiqc']['modules']
+
 rule multiqc:
     input:
-        "Stats/Stats.json",
-        "Stats/summary.txt",
+        _multiqc_input,
     output:
        "multiqc/multiqc_report.html"
     params:
         options=multiqc_params_options,
         input_directory=config['multiqc']['input_directory'],
         config_file=config['multiqc']['config_file'],
-        modules=config['multiqc']['modules']
+        modules=_multiqc_module
     log:
         "multiqc/multiqc.log"
     resources:
@@ -262,7 +312,7 @@ onsuccess:
 
 
     image1 = SequanaReport.png_to_embedded_png("dummy", "barcodes.png",
-                style="text-align:center; width:60%; height:40%", 
+                style="text-align:center; width:60%; height:40%",
                 alt="barcodes")
 
     image2 = SequanaReport.png_to_embedded_png("dummy", "summary.png",
@@ -271,24 +321,35 @@ onsuccess:
     image3 = SequanaReport.png_to_embedded_png("dummy", "samples.png",
                 style="width:60%; height:40%", alt="sample")
 
-
     intro = """<div>
-<p style="text-align:justify">This report summarizes the demultiplexing of your raw data. Some additional help to interpret the following plots can be found on the pipeline <a href="https://github.com/sequana/sequana_demultiplex">home page</a> and <a href="https://github.com/sequana/sequana_demultiplex/wiki">wiki</a>.</p>
+<h3>Overview</h3>
+<p style="text-align:justify">This report summarizes the demultiplexing of your raw BCL data into per-sample FASTQ files.
+The FASTQ files are located in the <strong>current working directory</strong>, organised by project and sample as defined in your sample sheet.
+Undetermined reads (those that could not be assigned to any sample) are written to files prefixed with <em>Undetermined</em>.
+A detailed MultiQC report is available <a href="multiqc/multiqc_report.html">here</a>.
+Additional help on interpreting the results can be found on the pipeline
+<a href="https://github.com/sequana/demultiplex">home page</a> and <a href="https://github.com/sequana/demultiplex/wiki">wiki</a>.</p>
 
 <hr>
-
-<p style="text-align:justify">The following image shows the indices found in the most undetermined barcodes per lane. An index in excess may indicate a wrong sample sheet with a potential typo or simply a missing sample/index.
-The 20 most represented undetermined barcodes are available <a href="undetermined_barcodes_20.csv">here</a>. A full list of all undetermined indices is also available <a href="undetermined_barcodes.csv">here</a> as a CSV file. The vertical dashed red line indicates the median number of reads found in the determined samples. If the bars are well below this line, your data is probably well demultiplexed.</p>
+<h3>Top undetermined barcodes per lane</h3>
+<p style="text-align:justify">The plot below shows the most frequent index sequences found among the undetermined reads, broken down by lane.
+A barcode appearing in large numbers may indicate a typo in the sample sheet, a missing sample, or an index that was not declared.
+The vertical dashed red line marks the median read count across all determined samples: bars significantly below this line suggest the run is well demultiplexed, while bars approaching or exceeding it warrant investigation.
+The top 20 undetermined barcodes are available as a CSV file <a href="undetermined_barcodes_20.csv">here</a>, and the complete list of all undetermined indices is available <a href="undetermined_barcodes.csv">here</a>.</p>
 <br>{}
 
 <hr>
-
-<p style="text-align:justify">The following image shows the ratio of determined vs. undetermined reads after demultiplexing. An excess of undetermined reads (more than 10-20%) may indicate a wrongly labelled sample in your sample sheet.</p>
+<h3>Determined vs. undetermined reads</h3>
+<p style="text-align:justify">The plot below shows the proportion of reads that were successfully assigned to a sample (determined) versus those that could not be assigned (undetermined), for each lane.
+A high fraction of undetermined reads (typically above 10–20%) may indicate a mislabelled sample, an index swap, or an error in the sample sheet.
+In a well-demultiplexed run, the vast majority of reads should fall in the determined category.</p>
 <br>{}
 
 <hr>
-
-<p style="text-align:justify">The following image shows the number of reads per sample.</p>
+<h3>Read counts per sample</h3>
+<p style="text-align:justify">The plot below shows the total number of reads assigned to each sample after demultiplexing.
+Samples with unexpectedly low read counts may have been affected by index mismatches or low cluster density on the corresponding lane.
+Large imbalances between samples loaded at equal proportions may indicate pipetting errors during library preparation.</p>
 <br>{}
 
 </div>""".format(image1, image2, image3)

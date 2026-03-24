@@ -27,7 +27,19 @@ from sequana.iem import IEM
 help = init_click(
     NAME,
     groups={
-        "Pipeline Specific": ["--method", "--skip-multiqc"],
+        "Pipeline Specific": [
+            "--threads",
+            "--barcode-mismatch",
+            "--merging-strategy",
+            "--bcl-directory",
+            "--sample-sheet",
+            "--use-bcl-convert",
+            "--no-ignore-missing-bcls",
+            "--strict-mode",
+            "--bgzf-compression",
+            "--mars-seq",
+            "--scatac-seq",
+        ],
     },
 )
 
@@ -35,7 +47,6 @@ help = init_click(
 @click.command(context_settings=help)
 @include_options_from(ClickSnakemakeOptions, working_directory="fastq")
 @include_options_from(ClickSlurmOptions)
-@include_options_from(ClickInputOptions, add_input_readtag=False)
 @include_options_from(ClickGeneralOptions)
 @click.option(
     "--threads",
@@ -101,6 +112,14 @@ equivalent as ignore_missing_bcls set to True with bcl2fastq""",
     help="""turn on BGZF compression for FASTQ files. By default,
 bcl2fastq uses this option; By default we don't. Set --bgzl--compression flag to
 set it back. For bcl2fastq only.""",
+)
+@click.option(
+    "--use-bcl-convert",
+    "use_bcl_convert",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Use bcl-convert instead of bcl2fastq for demultiplexing.",
 )
 @click.option(
     "--mars-seq",
@@ -181,12 +200,10 @@ def main(**options):
     cfg.bclconvert.threads = options.threads
     cfg.bcl2fastq.strict_mode = not options.strict_mode
 
-    if options.merging_strategy == "merge":
-        cfg.bcl2fastq.merge_all_lanes = True
-    elif options.merging_strategy in ["none", "none_and_force"]:
-        cfg.bcl2fastq.merge_all_lanes = False
+    merge = options.merging_strategy == "merge"
+    cfg.bcl2fastq.merge_all_lanes = merge
+    cfg.bclconvert.merge_all_lanes = merge
 
-    #
     if options.mars_seq:
         cfg.bcl2fastq.options = " --minimum-trimmed-read-length 15 --mask-short-adapter-reads 15 "
         if options.merging_strategy in ["merge"]:
@@ -196,9 +213,17 @@ def main(**options):
     elif options.scatac_seq:
         cfg.cellranger_atac.options = ""
         cfg.general.mode = "cellranger_atac"
-    #elif options.bclconvert:  # All other cases with bcl2fastq
-    #    cfg.general.mode = "bclconvert"
-
+    elif options.use_bcl_convert:
+        cfg.bclconvert.threads = options.threads
+        cfg.bclconvert.strict_mode = options.strict_mode
+        cfg.general.mode = "bclconvert"
+        # bcl-convert writes logs to /var/log/bcl-convert which is read-only inside
+        # Apptainer/Singularity containers. Bind a local writable directory instead.
+        if options.apptainer_prefix:
+            log_dir = os.path.abspath("bcl_convert_logs")
+            os.makedirs(log_dir, exist_ok=True)
+            bind = f"--bind {log_dir}:/var/log/bcl-convert"
+            options.apptainer_args = f"{options.apptainer_args} {bind}".strip()
     else:
         cfg.general.mode = "bcl2fastq"
         try:

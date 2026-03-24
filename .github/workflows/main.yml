@@ -36,7 +36,6 @@ jobs:
       shell: bash -l {0}
       run: |
         pip install .
-        pip install "pulp==2.7.0" --no-deps  # pin pulp to avoid dependency conflicts
 
     - name: Install dependencies
       shell: bash -l {0}
