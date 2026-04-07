@@ -1,6 +1,6 @@
 name: demultiplex
 channels:
-  - conda-forge
-  - defaults
+- conda-forge
+- defaults
 dependencies:
-  - pip
+- pulp>=2.7
